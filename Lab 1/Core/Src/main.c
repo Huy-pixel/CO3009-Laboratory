@@ -148,25 +148,17 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   /* USER CODE BEGIN 2 */
-  init7SEG();
-  state input = traffic_controller[0];
-  int counter = 4;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+  uint8_t counter = 0;
   while (1)
   {
-	  if (counter < 0) counter = 4;
-	  display7SEG(counter--);
-	  counter--;
-	  uint8_t output = Two_way_traffic(input);
+	  //HAL_GPIO_WritePin(YELLOW_x_GPIO_Port, YELLOW_x_Pin, counter >> 1);HAL_GPIO_WritePin(RED_x_GPIO_Port, RED_x_Pin, !(counter >> 1));counter = (counter + 1) & 3;
+
 	  HAL_Delay(1000);
-	  if (counter == 2)
-		  input = traffic_controller[output];
-	  else if (counter == 0)
-		  input = traffic_controller[output];
-	  else;
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -269,7 +261,7 @@ void Light_control(uint8_t bitmask)
 
 uint8_t Two_way_traffic(state transition)
 {
-	Light_control(transition.output);
+	//Light_control(transition.output);
 	return transition.next_state;
 }
 
