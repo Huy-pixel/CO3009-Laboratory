@@ -15,39 +15,31 @@
   *
   ******************************************************************************
   */
+/* Uncomment out line that need for testing */
+//#define ex1 1
+//#define ex2 1
+//#define ex3 1
+//#define ex4 1
+#define ex5 1
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "traffic_light.h"
+#include "led7seg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-typedef struct
-{
-	uint8_t output;
-	uint32_t delay;
-	uint8_t next_state;
-}state;
+
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define S0 0U
-#define S1 1U
-#define S2 2U
-#define S3 3U
 
-//Define LED value for bitmask usage
-#define xRED 	((uint8_t) 1 << 0)
-#define xYELLOW ((uint8_t) 1 << 1)
-#define xGREEN 	((uint8_t) 1 << 2)
-#define yRED 	((uint8_t) 1 << 3)
-#define yYELLOW ((uint8_t) 1 << 4)
-#define yGREEN 	((uint8_t) 1 << 5)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -56,61 +48,15 @@ typedef struct
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-
 /* USER CODE BEGIN PV */
-const state traffic_controller[4] =
-{		//output	  Delay	Input
-		{xRED | yGREEN,	3, S1},
-		{xRED | yYELLOW,2, S2},
-		{yRED | xGREEN,	3, S3},
-		{yRED | xYELLOW,2, S0}
-};
 
-const uint8_t seg_code[10] =
-{
-		0x3f, // 0
-		0x06, // 1
-		0x5B, // 2
-		0x4F, // 3
-		0x66, // 4
-		0x6D, // 5
-		0x7D, // 6
-		0x07, // 7
-		0x7F, // 8
-		0x6F, // 9
-};
-
-GPIO_TypeDef* port[7] =
-{
-		segA_GPIO_Port,
-		segB_GPIO_Port,
-		segC_GPIO_Port,
-		segD_GPIO_Port,
-		segE_GPIO_Port,
-		segF_GPIO_Port,
-		segG_GPIO_Port
-};
-
-uint16_t pin[7] =
-{
-		segA_Pin,
-		segB_Pin,
-		segC_Pin,
-		segD_Pin,
-		segE_Pin,
-		segF_Pin,
-		segG_Pin
-};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 /* USER CODE BEGIN PFP */
-void init7SEG();
-void Light_control(uint8_t bitmask);
-uint8_t Two_way_traffic(state output);
-void display7SEG(uint8_t num);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -142,7 +88,8 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-
+  Light_Init();
+  Led7seg_Init();
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -154,10 +101,64 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint8_t counter = 0;
+  uint8_t mask = 0;
   while (1)
   {
-	  //HAL_GPIO_WritePin(YELLOW_x_GPIO_Port, YELLOW_x_Pin, counter >> 1);HAL_GPIO_WritePin(RED_x_GPIO_Port, RED_x_Pin, !(counter >> 1));counter = (counter + 1) & 3;
+#ifdef ex1 //---Exercise 1 execution---//
+	  HAL_GPIO_WritePin(YELLOW_x_GPIO_Port, YELLOW_x_Pin, counter >> 1);
+	  HAL_GPIO_WritePin(RED_x_GPIO_Port, RED_x_Pin, !(counter >> 1));
 
+	  counter = (counter + 1) % 4;
+
+#elif ex2 //---Exercise 2 execution---//
+	  mask = 0;
+	  if (counter < 5)
+		  mask = xRED;
+	  else if (counter < 8)
+		  mask = xGREEN;
+	  else
+		  mask = xYELLOW;
+
+	  Light_Control(mask);
+
+	  counter = (counter + 1) % 10;
+
+#elif ex3 //---Exercise 3 execution---//
+	  mask = 0;
+	  if (counter < 3)
+		  mask = xRED | yGREEN;
+	  else if (counter < 5)
+		  mask = xRED | yYELLOW;
+	  else if (counter < 8)
+		  mask = yRED | xGREEN;
+	  else
+		  mask = yRED | xYELLOW;
+
+	  Light_Control(mask);
+
+	  counter = (counter + 1) % 10;
+
+#elif ex4 //---Exercise 4 execution---//
+	  if (counter >= 10) counter = 0;
+	  display7SEG(counter++);
+
+#elif ex5 //---Exercise 5 execution---//
+	  if (counter < 3)
+		  mask = xRED | yGREEN;
+	  else if (counter < 5)
+		  mask = xRED | yYELLOW;
+	  else if (counter < 8)
+		  mask = yRED | xGREEN;
+	  else
+		  mask = yRED | xYELLOW;
+
+	  Light_Control(mask);
+	  display7SEG((mask & xRED) ? 5 - counter :
+			  	  (mask & xGREEN) ? 8 - counter : 10 - counter);
+
+	  counter = (counter + 1) % 10;
+
+#endif
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
@@ -242,36 +243,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void init7SEG()
-{
-	for (uint8_t i = 0; i<7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], GPIO_PIN_SET);
-}
 
-void Light_control(uint8_t bitmask)
-{
-	HAL_GPIO_WritePin(RED_x_GPIO_Port, RED_x_Pin, (bitmask & xRED) ? 1:0);
-	HAL_GPIO_WritePin(YELLOW_x_GPIO_Port, YELLOW_x_Pin, (bitmask & xYELLOW) ? 1:0);
-	HAL_GPIO_WritePin(GREEN_x_GPIO_Port, GREEN_x_Pin, (bitmask & xGREEN) ? 1:0);
-
-	HAL_GPIO_WritePin(RED_y_GPIO_Port, RED_y_Pin, (bitmask & yRED) ? 1:0);
-	HAL_GPIO_WritePin(YELLOW_y_GPIO_Port, YELLOW_y_Pin, (bitmask & yYELLOW) ? 1:0);
-	HAL_GPIO_WritePin(GREEN_y_GPIO_Port, GREEN_y_Pin, (bitmask & yGREEN) ? 1:0);
-}
-
-uint8_t Two_way_traffic(state transition)
-{
-	//Light_control(transition.output);
-	return transition.next_state;
-}
-
-void display7SEG(uint8_t num)
-{
-	num = num % 10;
-	uint8_t index = seg_code[num];
-	for (uint8_t i = 0; i<7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? GPIO_PIN_RESET : GPIO_PIN_SET));
-}
 /* USER CODE END 4 */
 
 /**

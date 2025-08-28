@@ -1,0 +1,2 @@
+../Core/Src/traffic_light.c:11:6:Light_Init	1
+../Core/Src/traffic_light.c:22:6:Light_Control	1
