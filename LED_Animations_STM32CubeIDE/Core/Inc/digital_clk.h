@@ -1,6 +1,7 @@
 /*
  * @file:	digital_clk.h
  * @brief:	12_LEDs-based digital clock header file
+ * 			contains API provided for control a 12_LEDs-based digital clock
  *  Created on: Aug 29, 2025
  *      Author: soaic
  */
@@ -12,7 +13,6 @@
 #include "main.h"
 
 /* Function prototypes -------------------------------------------------------*/
-void dClockInit();
 void clearAllClock();
 void testClock(uint8_t counter);
 void setNumberOnClock(uint8_t num);

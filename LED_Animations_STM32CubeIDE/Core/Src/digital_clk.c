@@ -1,6 +1,7 @@
 /*
  * @file:	digital_clk.c
  * @brief:	12_LEDs-based digital clock source file
+ * 			contains private source code that controls clock
  *  Created on: Aug 29, 2025
  *      Author: soaic
  */
@@ -40,19 +41,29 @@ uint16_t clock_pin[12] =
 		dclk11_Pin
 };
 /* Private code --------------------------------------------------------------*/
-void dClockInit()
-{
-	for (uint8_t i = 0; i < 12; i++)
-		HAL_GPIO_WritePin(clock_port[i], clock_pin[i], 0);
-}
-
 void testClock(uint8_t counter)
 {
 	uint8_t num = counter % 12;
 	if (num == 0)
-			dClockInit();
+			clearAllClock();
 	for (uint8_t i = 0; i <= num; i++)
 		HAL_GPIO_WritePin(clock_port[i], clock_pin[i], 1);
+}
+
+void clearAllClock()
+{
+	for (uint8_t i = 0; i < 12; i++)
+			HAL_GPIO_WritePin(clock_port[i], clock_pin[i], 0);
+}
+
+void setNumberOnClock(uint8_t num)
+{
+	HAL_GPIO_WritePin(clock_port[num], clock_pin[num], 1);
+}
+
+void clearNumberOnClock(uint8_t num)
+{
+	HAL_GPIO_WritePin(clock_port[num], clock_pin[num], 0);
 }
 
 

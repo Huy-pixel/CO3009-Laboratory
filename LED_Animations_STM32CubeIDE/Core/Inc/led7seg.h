@@ -1,6 +1,7 @@
 /*
- * led7seg.h
- *
+ * @file:	led7seg.h
+ * @brief:	7-segment LED header file
+ * 			contains API provided for control 7-segment LED
  *  Created on: Aug 28, 2025
  *      Author: soaic
  */

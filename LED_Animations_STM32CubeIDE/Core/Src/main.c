@@ -15,14 +15,17 @@
   *
   ******************************************************************************
   */
-/* Uncomment out line that need for testing */
-//#define ex1 1
-//#define ex2 1
-//#define ex3 1
-//#define ex4 1
-//#define ex5 1
-#define ex6 1
-//#define dlck 1
+
+/* !!! UNCOMMENT OUT 1 line that need for testing, others need to be commented out !!!*/
+
+//#define ex1 1		//---Exercise 1 execution---//
+//#define ex2 1		//---Exercise 2 execution---//
+//#define ex3 1		//---Exercise 3 execution---//
+//#define ex4 1		//---Exercise 4 execution---//
+//#define ex5 1		//---Exercise 5 execution---//
+//#define ex6 1		//---Exercise 6 execution---//
+#define dclk 1	//---Exercise 7,8,9,10 combined execution---//
+
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -91,9 +94,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  //dClockInit();
-  Light_Init();
-  Led7seg_Init();
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -104,17 +105,29 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+#if defined(ex1) || defined(ex2) || defined(ex3) || defined(ex4) || defined(ex5)
   uint8_t counter = 0;
-  //uint8_t mask = 0;
+#ifndef ex1
+  uint8_t mask = 0;
+#endif
+#endif /* defined ex1 || ex2 || ex3 || ex4 || ex5 */
+
+#ifdef dclk
+  uint8_t hour = 0;
+  uint8_t min = 0;
+  uint8_t sec = 0;
+  clearAllClock();
+#endif /* dclk */
+
   while (1)
   {
-#ifdef ex1 //---Exercise 1 execution---//
+#ifdef ex1
 	  HAL_GPIO_WritePin(YELLOW_x_GPIO_Port, YELLOW_x_Pin, counter >> 1);
 	  HAL_GPIO_WritePin(RED_x_GPIO_Port, RED_x_Pin, !(counter >> 1));
 
 	  counter = (counter + 1) % 4;
 
-#elif ex2 //---Exercise 2 execution---//
+#elif ex2
 	  mask = 0;
 	  if (counter < 5)
 		  mask = xRED;
@@ -127,7 +140,7 @@ int main(void)
 
 	  counter = (counter + 1) % 10;
 
-#elif ex3 //---Exercise 3 execution---//
+#elif ex3
 	  mask = 0;
 	  if (counter < 3)
 		  mask = xRED | yGREEN;
@@ -142,11 +155,11 @@ int main(void)
 
 	  counter = (counter + 1) % 10;
 
-#elif ex4 //---Exercise 4 execution---//
+#elif ex4
 	  if (counter >= 10) counter = 0;
 	  display7SEG(counter++);
 
-#elif ex5 //---Exercise 5 execution---//
+#elif ex5
 	  if (counter < 3)
 		  mask = xRED | yGREEN;
 	  else if (counter < 5)
@@ -161,10 +174,31 @@ int main(void)
 			  	  (mask & xGREEN) ? 8 - counter : 10 - counter);
 
 	  counter = (counter + 1) % 10;
+
 #elif ex6
 	  testClock(counter++);
+
+#elif dclk
+	  setNumberOnClock(hour);
+	  setNumberOnClock(min/5);
+	  setNumberOnClock(sec/5);
 #endif
+
 	  HAL_Delay(1000);
+
+#ifdef dclk
+	  clearNumberOnClock(hour);
+	  clearNumberOnClock(min/5);
+	  clearNumberOnClock(sec/5);
+
+	  sec = (sec + 1) % 60;
+	  if (sec == 0)
+	  {
+		  min = (min + 1) % 60;
+		  if (min == 0)
+			  hour = (hour + 1) % 12;
+	  }
+#endif /* dclk */
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

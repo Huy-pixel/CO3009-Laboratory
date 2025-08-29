@@ -1,6 +1,7 @@
 /*
- * led7seg.c
- *
+ * @file:	led7seg.c
+ * @brief:	7-segment LED source file
+ * 			contains private source code that programs 7-segment LED
  *  Created on: Aug 28, 2025
  *      Author: soaic
  */
