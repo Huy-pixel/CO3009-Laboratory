@@ -32,8 +32,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "traffic_light.h"
-#include "led7seg.h"
+//#include "traffic_light.h"
+//#include "led7seg.h"
 #include "digital_clk.h"
 /* USER CODE END Includes */
 
@@ -113,10 +113,10 @@ int main(void)
 #endif /* defined ex1 || ex2 || ex3 || ex4 || ex5 */
 
 #ifdef dclk
-  uint8_t hour = 0;
-  uint8_t min = 0;
-  uint8_t sec = 0;
-  clearAllClock();
+  int hour = 0;
+  int min = 0;
+  int sec = 0;
+  //clearAllClock();
 #endif /* dclk */
 
   while (1)
@@ -184,20 +184,29 @@ int main(void)
 	  setNumberOnClock(sec/5);
 #endif
 
-	  HAL_Delay(1000);
+	  HAL_Delay(100);
 
 #ifdef dclk
 	  clearNumberOnClock(hour);
 	  clearNumberOnClock(min/5);
 	  clearNumberOnClock(sec/5);
 
-	  sec = (sec + 1) % 60;
-	  if (sec == 0)
-	  {
-		  min = (min + 1) % 60;
-		  if (min == 0)
-			  hour = (hour + 1) % 12;
-	  }
+	  sec++;
+	  		if (sec >= 60)
+	  		{
+	  			++min;
+	  			sec = 0;
+	  		}
+	  		if (min >= 60)
+	  		{
+	  			++hour;
+	  			min = 0;
+	  		}
+	  		if (hour >= 12)
+	  		{
+	  			hour = 0;
+	  		}
+
 #endif /* dclk */
     /* USER CODE END WHILE */
 
