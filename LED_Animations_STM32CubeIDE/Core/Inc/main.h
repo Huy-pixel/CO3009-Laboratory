@@ -73,6 +73,16 @@ void Error_Handler(void);
 #define segG_GPIO_Port GPIOA
 #define RED_x_Pin GPIO_PIN_7
 #define RED_x_GPIO_Port GPIOA
+#define dclk0_Pin GPIO_PIN_0
+#define dclk0_GPIO_Port GPIOB
+#define dclk1_Pin GPIO_PIN_1
+#define dclk1_GPIO_Port GPIOB
+#define dclk2_Pin GPIO_PIN_2
+#define dclk2_GPIO_Port GPIOB
+#define dclk10_Pin GPIO_PIN_10
+#define dclk10_GPIO_Port GPIOB
+#define dclk11_Pin GPIO_PIN_11
+#define dclk11_GPIO_Port GPIOB
 #define YELLOW_x_Pin GPIO_PIN_8
 #define YELLOW_x_GPIO_Port GPIOA
 #define GREEN_x_Pin GPIO_PIN_9
@@ -83,6 +93,20 @@ void Error_Handler(void);
 #define YELLOW_y_GPIO_Port GPIOA
 #define GREEN_y_Pin GPIO_PIN_12
 #define GREEN_y_GPIO_Port GPIOA
+#define dclk3_Pin GPIO_PIN_3
+#define dclk3_GPIO_Port GPIOB
+#define dclk4_Pin GPIO_PIN_4
+#define dclk4_GPIO_Port GPIOB
+#define dclk5_Pin GPIO_PIN_5
+#define dclk5_GPIO_Port GPIOB
+#define dclk6_Pin GPIO_PIN_6
+#define dclk6_GPIO_Port GPIOB
+#define dclk7_Pin GPIO_PIN_7
+#define dclk7_GPIO_Port GPIOB
+#define dclk8_Pin GPIO_PIN_8
+#define dclk8_GPIO_Port GPIOB
+#define dclk9_Pin GPIO_PIN_9
+#define dclk9_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 

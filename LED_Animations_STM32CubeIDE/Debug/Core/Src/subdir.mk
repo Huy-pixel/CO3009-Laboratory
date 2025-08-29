@@ -5,6 +5,7 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../Core/Src/digital_clk.c \
 ../Core/Src/led7seg.c \
 ../Core/Src/main.c \
 ../Core/Src/stm32f1xx_hal_msp.c \
@@ -15,6 +16,7 @@ C_SRCS += \
 ../Core/Src/traffic_light.c 
 
 OBJS += \
+./Core/Src/digital_clk.o \
 ./Core/Src/led7seg.o \
 ./Core/Src/main.o \
 ./Core/Src/stm32f1xx_hal_msp.o \
@@ -25,6 +27,7 @@ OBJS += \
 ./Core/Src/traffic_light.o 
 
 C_DEPS += \
+./Core/Src/digital_clk.d \
 ./Core/Src/led7seg.d \
 ./Core/Src/main.d \
 ./Core/Src/stm32f1xx_hal_msp.d \
@@ -42,7 +45,7 @@ Core/Src/%.o Core/Src/%.su Core/Src/%.cyclo: ../Core/Src/%.c Core/Src/subdir.mk
 clean: clean-Core-2f-Src
 
 clean-Core-2f-Src:
-	-$(RM) ./Core/Src/led7seg.cyclo ./Core/Src/led7seg.d ./Core/Src/led7seg.o ./Core/Src/led7seg.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32f1xx_hal_msp.cyclo ./Core/Src/stm32f1xx_hal_msp.d ./Core/Src/stm32f1xx_hal_msp.o ./Core/Src/stm32f1xx_hal_msp.su ./Core/Src/stm32f1xx_it.cyclo ./Core/Src/stm32f1xx_it.d ./Core/Src/stm32f1xx_it.o ./Core/Src/stm32f1xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f1xx.cyclo ./Core/Src/system_stm32f1xx.d ./Core/Src/system_stm32f1xx.o ./Core/Src/system_stm32f1xx.su ./Core/Src/traffic_light.cyclo ./Core/Src/traffic_light.d ./Core/Src/traffic_light.o ./Core/Src/traffic_light.su
+	-$(RM) ./Core/Src/digital_clk.cyclo ./Core/Src/digital_clk.d ./Core/Src/digital_clk.o ./Core/Src/digital_clk.su ./Core/Src/led7seg.cyclo ./Core/Src/led7seg.d ./Core/Src/led7seg.o ./Core/Src/led7seg.su ./Core/Src/main.cyclo ./Core/Src/main.d ./Core/Src/main.o ./Core/Src/main.su ./Core/Src/stm32f1xx_hal_msp.cyclo ./Core/Src/stm32f1xx_hal_msp.d ./Core/Src/stm32f1xx_hal_msp.o ./Core/Src/stm32f1xx_hal_msp.su ./Core/Src/stm32f1xx_it.cyclo ./Core/Src/stm32f1xx_it.d ./Core/Src/stm32f1xx_it.o ./Core/Src/stm32f1xx_it.su ./Core/Src/syscalls.cyclo ./Core/Src/syscalls.d ./Core/Src/syscalls.o ./Core/Src/syscalls.su ./Core/Src/sysmem.cyclo ./Core/Src/sysmem.d ./Core/Src/sysmem.o ./Core/Src/sysmem.su ./Core/Src/system_stm32f1xx.cyclo ./Core/Src/system_stm32f1xx.d ./Core/Src/system_stm32f1xx.o ./Core/Src/system_stm32f1xx.su ./Core/Src/traffic_light.cyclo ./Core/Src/traffic_light.d ./Core/Src/traffic_light.o ./Core/Src/traffic_light.su
 
 .PHONY: clean-Core-2f-Src
 

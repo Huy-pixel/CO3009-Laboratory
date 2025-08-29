@@ -1,0 +1,2 @@
+../Core/Src/digital_clk.c:43:6:dClockInit	16	static
+../Core/Src/digital_clk.c:49:6:testClock	24	static

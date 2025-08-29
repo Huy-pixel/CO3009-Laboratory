@@ -20,8 +20,9 @@
 //#define ex2 1
 //#define ex3 1
 //#define ex4 1
-#define ex5 1
-
+//#define ex5 1
+#define ex6 1
+//#define dlck 1
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -30,6 +31,7 @@
 /* USER CODE BEGIN Includes */
 #include "traffic_light.h"
 #include "led7seg.h"
+#include "digital_clk.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -48,6 +50,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -88,6 +91,7 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
+  //dClockInit();
   Light_Init();
   Led7seg_Init();
   /* USER CODE END SysInit */
@@ -101,7 +105,7 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   uint8_t counter = 0;
-  uint8_t mask = 0;
+  //uint8_t mask = 0;
   while (1)
   {
 #ifdef ex1 //---Exercise 1 execution---//
@@ -157,7 +161,8 @@ int main(void)
 			  	  (mask & xGREEN) ? 8 - counter : 10 - counter);
 
 	  counter = (counter + 1) % 10;
-
+#elif ex6
+	  testClock(counter++);
 #endif
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
@@ -217,12 +222,18 @@ static void MX_GPIO_Init(void)
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, segA_Pin|segB_Pin|segC_Pin|segD_Pin
                           |segE_Pin|segF_Pin|segG_Pin|RED_x_Pin
                           |YELLOW_x_Pin|GREEN_x_Pin|RED_y_Pin|YELLOW_y_Pin
                           |GREEN_y_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, dclk0_Pin|dclk1_Pin|dclk2_Pin|dclk10_Pin
+                          |dclk11_Pin|dclk3_Pin|dclk4_Pin|dclk5_Pin
+                          |dclk6_Pin|dclk7_Pin|dclk8_Pin|dclk9_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : segA_Pin segB_Pin segC_Pin segD_Pin
                            segE_Pin segF_Pin segG_Pin RED_x_Pin
@@ -236,6 +247,17 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : dclk0_Pin dclk1_Pin dclk2_Pin dclk10_Pin
+                           dclk11_Pin dclk3_Pin dclk4_Pin dclk5_Pin
+                           dclk6_Pin dclk7_Pin dclk8_Pin dclk9_Pin */
+  GPIO_InitStruct.Pin = dclk0_Pin|dclk1_Pin|dclk2_Pin|dclk10_Pin
+                          |dclk11_Pin|dclk3_Pin|dclk4_Pin|dclk5_Pin
+                          |dclk6_Pin|dclk7_Pin|dclk8_Pin|dclk9_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
