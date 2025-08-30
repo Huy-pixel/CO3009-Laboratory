@@ -1,2 +1,2 @@
 # A VDK-VXL-laboratory
-Lab 1 repo
+A default branch (a newly created project, nothing done)

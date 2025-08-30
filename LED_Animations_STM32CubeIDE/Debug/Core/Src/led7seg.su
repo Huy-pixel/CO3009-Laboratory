@@ -1,2 +1,0 @@
-../Core/Src/led7seg.c:48:6:Led7seg_Init	16	static
-../Core/Src/led7seg.c:54:6:display7SEG	24	static
