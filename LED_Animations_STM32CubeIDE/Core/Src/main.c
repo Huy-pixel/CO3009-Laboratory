@@ -22,9 +22,9 @@
 //#define ex2 1		//---Exercise 2 execution---//
 //#define ex3 1		//---Exercise 3 execution---//
 //#define ex4 1		//---Exercise 4 execution---//
-//#define ex5 1		//---Exercise 5 execution---//
+#define ex5 1		//---Exercise 5 execution---//
 //#define ex6 1		//---Exercise 6 execution---//
-#define dclk 1	//---Exercise 7,8,9,10 combined execution---//
+//#define dclk 1	//---Exercise 10 (7,8,9 integrated) execution---//
 
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
@@ -32,8 +32,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-//#include "traffic_light.h"
-//#include "led7seg.h"
+#include "traffic_light.h"
+#include "led7seg.h"
 #include "digital_clk.h"
 /* USER CODE END Includes */
 
@@ -116,7 +116,7 @@ int main(void)
   int hour = 0;
   int min = 0;
   int sec = 0;
-  //clearAllClock();
+  clearAllClock(); //Initialize digital clock state
 #endif /* dclk */
 
   while (1)
@@ -192,20 +192,18 @@ int main(void)
 	  clearNumberOnClock(sec/5);
 
 	  sec++;
-	  		if (sec >= 60)
-	  		{
-	  			++min;
-	  			sec = 0;
-	  		}
-	  		if (min >= 60)
-	  		{
-	  			++hour;
-	  			min = 0;
-	  		}
-	  		if (hour >= 12)
-	  		{
-	  			hour = 0;
-	  		}
+	  if (sec >= 60)
+	  {
+		  min++;
+		  sec = 0;
+	  }
+	  if (min >= 60)
+	  {
+		  hour++;
+		  min = 0;
+	  }
+	  if (hour >= 12)
+		  hour = 0;
 
 #endif /* dclk */
     /* USER CODE END WHILE */

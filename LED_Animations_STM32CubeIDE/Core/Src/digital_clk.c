@@ -9,7 +9,7 @@
 /* Private includes ----------------------------------------------------------*/
 #include "digital_clk.h"
 /* Private variables ----------------------------------------------------------*/
-GPIO_TypeDef* clock_port[12] =
+static GPIO_TypeDef* port[12] =
 {
 		dclk0_GPIO_Port,
 		dclk1_GPIO_Port,
@@ -25,7 +25,7 @@ GPIO_TypeDef* clock_port[12] =
 		dclk11_GPIO_Port
 };
 
-uint16_t clock_pin[12] =
+static uint16_t pin[12] =
 {
 		dclk0_Pin,
 		dclk1_Pin,
@@ -41,29 +41,50 @@ uint16_t clock_pin[12] =
 		dclk11_Pin
 };
 /* Private code --------------------------------------------------------------*/
+
+/**
+ * @brief	A test function, turn on 12 LEDs in sequence
+ * @param	LED counter
+ * @retval	None
+ */
 void testClock(uint8_t counter)
 {
 	uint8_t num = counter % 12;
 	if (num == 0)
 			clearAllClock();
 	for (uint8_t i = 0; i <= num; i++)
-		HAL_GPIO_WritePin(clock_port[i], clock_pin[i], 1);
+		HAL_GPIO_WritePin(port[i], pin[i], 1);
 }
 
+/**
+ * @brief	Turn off all LEDs of digital clock
+ * @param	None
+ * @retval	None
+ */
 void clearAllClock()
 {
 	for (uint8_t i = 0; i < 12; i++)
-			HAL_GPIO_WritePin(clock_port[i], clock_pin[i], 0);
+			HAL_GPIO_WritePin(port[i], pin[i], 0);
 }
 
+/**
+ * @brief	set high a LED on clock
+ * @param	LED's position on clock
+ * @retval	None
+ */
 void setNumberOnClock(uint8_t num)
 {
-	HAL_GPIO_WritePin(clock_port[num], clock_pin[num], 1);
+	HAL_GPIO_WritePin(port[num], pin[num], 1);
 }
 
+/**
+ * @brief	clear a LED
+ * @param	LED's position
+ * @retval	None
+ */
 void clearNumberOnClock(uint8_t num)
 {
-	HAL_GPIO_WritePin(clock_port[num], clock_pin[num], 0);
+	HAL_GPIO_WritePin(port[num], pin[num], 0);
 }
 
 
