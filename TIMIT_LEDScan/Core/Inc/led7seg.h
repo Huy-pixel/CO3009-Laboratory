@@ -10,8 +10,8 @@
 #define INC_LED7SEG_H_
 
 /* Includes ------------------------------------------------------------------*/
+#include "stdint.h"
 #include "main.h"
-
 
 /* Function prototypes -------------------------------------------------------*/
 void Led7seg_Init();
