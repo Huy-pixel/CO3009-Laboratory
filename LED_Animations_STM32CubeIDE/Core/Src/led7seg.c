@@ -9,6 +9,10 @@
 #include "led7seg.h"
 
 /* Private variables ----------------------------------------------------------*/
+
+/**
+ * An array for looking up bit-mask used to display 7-segments LED
+ */
 static const uint8_t seg_code[10] =
 {
 		0x3f, // 0
@@ -45,6 +49,9 @@ static uint16_t pin[7] =
 		segG_Pin
 };
 
+/**
+ * A lookup table preserving number not exceed limits
+ */
 static const uint8_t dmap[16] =
 {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	// 0-9
