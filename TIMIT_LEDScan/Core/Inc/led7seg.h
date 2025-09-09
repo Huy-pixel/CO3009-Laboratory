@@ -12,6 +12,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
+
 /* Function prototypes -------------------------------------------------------*/
 void Led7seg_Init();
 void display7SEG(uint8_t num);
