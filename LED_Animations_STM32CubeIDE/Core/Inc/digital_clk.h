@@ -10,6 +10,7 @@
 #define INC_DIGITAL_CLK_H_
 
 /* Includes ------------------------------------------------------------------*/
+#include "stdint.h"
 #include "main.h"
 
 /* Function prototypes -------------------------------------------------------*/
