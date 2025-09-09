@@ -128,7 +128,7 @@ int main(void)
 		  hour = 0;
 	  }
 	  updateClockBuffer();
-	  HAL_Delay(200);
+	  HAL_Delay(1000);
 #endif
     /* USER CODE END WHILE */
 
