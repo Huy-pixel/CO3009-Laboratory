@@ -1,6 +1,6 @@
 /*
  * @file:	software_timer.h
- * @brief:	software timer header file defines some APIs and interrupt flag
+ * @brief:	software-timer header file defines some APIs and interrupt flag
  *  Created on: Sep 9, 2025
  *      Author: soaic
  */

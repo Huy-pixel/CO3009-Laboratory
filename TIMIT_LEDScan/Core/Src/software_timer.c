@@ -13,15 +13,14 @@
 
 /* Private defines -----------------------------------------------------------*/
 #define MAX_TIMER 10U	/* Configures number of timers for timer pool */
-#define TIMER_CYCLE 10U /* Please refers to hardware-timer cycle to set this up correctly */
+#define TIMER_CYCLE 10U /* The hardware-timer cycle, in milliseconds;
+ 	 	 	 	 	 	   Please refers to "STM32 Timers configuration" to set this up correctly */
 
 /* Declare timer's components ------------------------------------------------*/
 uint16_t pTIM_counter[MAX_TIMER];	/* a software-timer pool with 10 timer-counters available */
-uint8_t  pTIM_flag[MAX_TIMER];		/* a timer flag pool in associate with timer pool */
+uint8_t  pTIM_flag[MAX_TIMER];		/* a timer-flag pool in associate with timer pool */
 
-/* Timer's implementation ----------------------------------------------------*/
-
-
+/* Software-timer's implementation ----------------------------------------------------*/
 
 /**
  * @brief	set timer interval of which is being used
