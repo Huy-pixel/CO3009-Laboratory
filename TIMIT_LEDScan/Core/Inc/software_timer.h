@@ -12,8 +12,8 @@
 #include "stdint.h"
 
 /* Variables -----------------------------------------------------------------*/
-extern uint16_t pTIM_counter[];
 extern uint8_t  pTIM_flag[];
+
 /* Function prototypes -------------------------------------------------------*/
 void setTimer(uint16_t duration, uint8_t index);
 void timer_run(uint8_t index);

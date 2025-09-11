@@ -19,7 +19,6 @@
 /* Declare timer's components ------------------------------------------------*/
 uint16_t pTIM_counter[MAX_TIMER];	/* a software-timer pool with 10 timer-counters available */
 uint8_t  pTIM_flag[MAX_TIMER];		/* a timer-flag pool in associate with timer pool */
-
 /* Software-timer's implementation ----------------------------------------------------*/
 
 /**
@@ -37,6 +36,7 @@ void setTimer(uint16_t duration, uint8_t index)
 /**
  * @brief	run software-timer
  * @param	index: index of timer being used in timer pool, must be in range of [0, MAX_TIMER]
+ * @note
  * @retval	None
  */
 void timer_run(uint8_t index)
