@@ -13,19 +13,6 @@
 #define matrix_col 8
 
 /* Private variables ---------------------------------------------------------*/
-uint8_t bitmask;
-uint8_t charA[matrix_row] =
-{
-		0b00011000,
-		0b00111100,
-		0b00100100,
-		0b01100110,
-		0b01111110,
-		0b01100110,
-		0b01100110,
-		0b01100110
-};
-
 static GPIO_TypeDef* column_port[8] =
 {
 		ENM0_GPIO_Port,
@@ -73,22 +60,74 @@ static uint16_t row_pin[8] =
 		ROW6_Pin,
 		ROW7_Pin
 };
+
+uint8_t bitmask;
+
+uint8_t charA[matrix_row] =
+{
+		0b00011000,
+		0b00111100,
+		0b00100100,
+		0b01100110,
+		0b01111110,
+		0b01100110,
+		0b01100110,
+		0b01100110
+};
+
+uint32_t word_32_name[matrix_row] =
+{
+		0b01100110011001100110011000000000,
+		0b01100110011001100110011000000000,
+		0b01100110011001100110011000000000,
+		0b01111110011001100011110000000000,
+		0b01111110011001100001100000000000,
+		0b01100110011001100001100000000000,
+		0b01100110011001100001100000000000,
+		0b01100110001111000001100000000000
+};
 /* Private implementation ----------------------------------------------------*/
 
+/**
+ * @brief	clear LED matrix by pull high all cathode pin
+ * @param	None
+ * @retval	None
+ */
 void clearLEDMatrix()
 {
 	for (uint8_t i = 0; i < 8; i++)
 		HAL_GPIO_WritePin(row_port[i], row_pin[i], 1);
 }
+
+/**
+ * @brief	update buffer, this buffer specified LED state in one row of matrix
+ * @param	row index
+ * @retval	None
+ */
 void update_buffer(uint8_t row)
 {
+#ifdef name_display
+	bitmask = word_32_name[row] >> 24;
+#else
 	bitmask = charA[row];
+#endif
 }
 
-uint8_t circular_shift(uint8_t num)
+/**
+ * @brief	circular shift a 8-bit word left
+ * @param	num: a 8-bit-long word
+ * @retval	a left-shifted 8-bit word
+ */
+uint8_t circular_shift_left(uint8_t num)
 {
-	uint8_t lsb = num & 1;
-	return (num >> 1) | lsb << 7;
+	uint8_t msb = num >> 7;
+	return (num << 1) | msb;
+}
+
+uint32_t circular_shift_left_32(uint32_t num)
+{
+	uint8_t msb = num >> 31;
+	return (num << 1) | msb;
 }
 /* Implementation ------------------------------------------------------------*/
 void updateLEDMatrix(uint8_t index)
@@ -152,7 +191,14 @@ void updateLEDMatrix(uint8_t index)
 
 void shift_left()
 {
-	for(uint8_t i=0; i<8; i++)
-		charA[i] = circular_shift(charA[i]);
+	for(uint8_t i = 0; i < 8; i++)
+		charA[i] = circular_shift_left(charA[i]);
 }
 
+void shift_left_32()
+{
+	for(uint8_t i=0; i < 8; i++)
+	{
+		word_32_name[i] = circular_shift_left_32(word_32_name[i]);
+	}
+}

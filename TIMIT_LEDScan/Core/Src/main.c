@@ -145,7 +145,11 @@ int main(void)
 	  {
 		  setTimer(500, 2);
 		  //update7SEG(index_led);
+#ifdef name_display
+		  shift_left_32();
+#else
 		  shift_left();
+#endif
 	  }
 
     /* USER CODE END WHILE */
