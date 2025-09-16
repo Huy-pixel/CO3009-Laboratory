@@ -17,8 +17,8 @@
  	 	 	 	 	 	   Please refers to "STM32 Timers configuration" to set this up correctly */
 
 /* Declare timer's components ------------------------------------------------*/
-uint16_t pTIM_counter[MAX_TIMER];	/* a software-timer pool with 10 timer-counters available */
-uint8_t  pTIM_flag[MAX_TIMER];		/* a timer-flag pool in associate with timer pool */
+static uint16_t pTIM_counter[MAX_TIMER];	/* a software-timer pool with 10 timer-counters available */
+uint8_t  pTIM_flag[MAX_TIMER];				/* a timer-flag pool in associate with timer pool */
 /* Software-timer's implementation ----------------------------------------------------*/
 
 /**

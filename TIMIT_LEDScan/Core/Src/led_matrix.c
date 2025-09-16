@@ -2,7 +2,7 @@
  * @file:	led_matrix.c
  * @brief:	8x8 led matrix source file
  *  Created on: Sep 10, 2025
- *      Author: soaic
+ *      Author: huy
  */
 
 /* Private includes ----------------------------------------------------------*/
@@ -61,9 +61,7 @@ static uint16_t row_pin[8] =
 		ROW7_Pin
 };
 
-uint8_t bitmask;
-
-uint8_t charA[matrix_row] =
+static uint8_t charA[matrix_row] =
 {
 		0b00011000,
 		0b00111100,
@@ -75,7 +73,7 @@ uint8_t charA[matrix_row] =
 		0b01100110
 };
 
-uint32_t word_32_name[matrix_row] =
+static uint32_t word_32_name[matrix_row] =
 {
 		0b01100110011001100110011000000000,
 		0b01100110011001100110011000000000,
@@ -86,6 +84,8 @@ uint32_t word_32_name[matrix_row] =
 		0b01100110011001100001100000000000,
 		0b01100110001111000001100000000000
 };
+
+static uint8_t bitmask;
 /* Private implementation ----------------------------------------------------*/
 
 /**
@@ -93,7 +93,7 @@ uint32_t word_32_name[matrix_row] =
  * @param	None
  * @retval	None
  */
-void clearLEDMatrix()
+static void clearLEDMatrix()
 {
 	for (uint8_t i = 0; i < 8; i++)
 		HAL_GPIO_WritePin(row_port[i], row_pin[i], 1);
@@ -104,7 +104,7 @@ void clearLEDMatrix()
  * @param	row index
  * @retval	None
  */
-void update_buffer(uint8_t row)
+static void update_buffer(uint8_t row)
 {
 #ifdef name_display
 	bitmask = word_32_name[row] >> 24;
@@ -118,26 +118,38 @@ void update_buffer(uint8_t row)
  * @param	num: a 8-bit-long word
  * @retval	a left-shifted 8-bit word
  */
-uint8_t circular_shift_left(uint8_t num)
+static uint8_t circular_shift_left(uint8_t num)
 {
 	uint8_t msb = num >> 7;
 	return (num << 1) | msb;
 }
 
-uint32_t circular_shift_left_32(uint32_t num)
+/**
+ * @brief	circular shift a 32-bit word left
+ * @param	num: a 32-bit-long word
+ * @retval	a left-shifted 32-bit word
+ */
+static uint32_t circular_shift_left_32(uint32_t num)
 {
 	uint8_t msb = num >> 31;
 	return (num << 1) | msb;
 }
+
 /* Implementation ------------------------------------------------------------*/
+
+/**
+ * @brief	display 1 row of led matrix
+ * @param	row index
+ * reval	None
+ */
 void updateLEDMatrix(uint8_t index)
 {
-	clearLEDMatrix();
+	clearLEDMatrix(); // all LEDs on led-matrix turn off
 
 	switch(index)
 	{
 	case 0:
-		update_buffer(0);
+		update_buffer(0); // get a string to display in row 1
 
 		HAL_GPIO_WritePin(row_port[0], row_pin[0], 0);
 
@@ -145,56 +157,80 @@ void updateLEDMatrix(uint8_t index)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 1:
-		update_buffer(1);
+		update_buffer(1); // get a string to display in row 2
+
 		HAL_GPIO_WritePin(row_port[1], row_pin[1], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 2:
-		update_buffer(2);
+		update_buffer(2); // get a string to display in row 3
+
 		HAL_GPIO_WritePin(row_port[2], row_pin[2], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 3:
-		update_buffer(3);
+		update_buffer(3); // get a string to display in row 4
+
 		HAL_GPIO_WritePin(row_port[3], row_pin[3], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 4:
-		update_buffer(4);
+		update_buffer(4); // get a string to display in row 5
+
 		HAL_GPIO_WritePin(row_port[4], row_pin[4], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 5:
-		update_buffer(5);
+		update_buffer(5); // get a string to display in row 6
+
 		HAL_GPIO_WritePin(row_port[5], row_pin[5], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 6:
-		update_buffer(6);
+		update_buffer(6); // get a string to display in row 7
+
 		HAL_GPIO_WritePin(row_port[6], row_pin[6], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	case 7:
-		update_buffer(7);
+		update_buffer(7); // get a string to display in row 8
+
 		HAL_GPIO_WritePin(row_port[7], row_pin[7], 0);
+
 		for (uint8_t i = 0; i < 8; i++)
 			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
 		break;
 	}
 }
 
+/**
+ * @brief	shift left character A which is 8-bit long on 8x8 led matrix
+ * @param	None
+ * @retval	None
+ */
 void shift_left()
 {
 	for(uint8_t i = 0; i < 8; i++)
 		charA[i] = circular_shift_left(charA[i]);
 }
 
+/**
+ * @brief	shift left a 32-bit long on 8x8 led matrix
+ * @param	None
+ * @retval	None
+ */
 void shift_left_32()
 {
 	for(uint8_t i=0; i < 8; i++)

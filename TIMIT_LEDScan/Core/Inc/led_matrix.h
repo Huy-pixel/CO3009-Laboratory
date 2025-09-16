@@ -2,7 +2,7 @@
  * @file:	led_matrix.h
  * @brief:	8x8 led matrix header file
  *  Created on: Sep 10, 2025
- *      Author: soaic
+ *      Author: huy
  */
 
 #ifndef INC_LED_MATRIX_H_
@@ -13,7 +13,7 @@
 #include "main.h"
 
 /* Defines -------------------------------------------------------------------*/
-#define name_display
+//#define name_display
 
 /* Function prototypes -------------------------------------------------------*/
 void updateLEDMatrix(uint8_t index);
