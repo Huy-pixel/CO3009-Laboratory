@@ -45,11 +45,21 @@
 TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN PV */
-#ifndef ex2
 const uint8_t MAX_LED = 4;
 uint8_t led_buffer[4] = {1, 2, 3, 4};
 uint8_t hour = 15, minute = 8, second = 50;
-#endif /* ex3 or ex4 or ex5 */
+
+uint8_t charA[8] =
+{
+		0b00011000,
+		0b00111100,
+		0b00100100,
+		0b01100110,
+		0b01111110,
+		0b01100110,
+		0b01100110,
+		0b01100110
+};
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,6 +112,8 @@ int main(void)
   setTimer(13, 1);
   setTimer(500, 2);
   uint8_t index_led = 0;
+  uint8_t cyc = 0;
+  init_frame(charA);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -133,7 +145,7 @@ int main(void)
 		  updateClockBuffer();
 	  }
 
-	  /* An interval of half of second */
+	  /* An interval of 13ms */
 	  if (pTIM_flag[1] == 1)
 	  {
 		  setTimer(13, 1);
@@ -148,7 +160,15 @@ int main(void)
 #ifdef name_display
 		  shift_left_32();
 #else
-		  shift_left();
+		  cyc = (cyc + 1) % 33;
+		  if (cyc < 9)
+			  shift_left(1);
+		  else if (cyc < 17)
+			  shift_left(0);
+		  else if (cyc < 25)
+			  shift_up(1);
+		  else
+			  shift_up(0);
 #endif
 	  }
 

@@ -61,18 +61,6 @@ static uint16_t row_pin[8] =
 		ROW7_Pin
 };
 
-static uint8_t charA[matrix_row] =
-{
-		0b00011000,
-		0b00111100,
-		0b00100100,
-		0b01100110,
-		0b01111110,
-		0b01100110,
-		0b01100110,
-		0b01100110
-};
-
 static uint32_t word_32_name[matrix_row] =
 {
 		0b01100110011001100110011000000000,
@@ -85,6 +73,7 @@ static uint32_t word_32_name[matrix_row] =
 		0b01100110001111000001100000000000
 };
 
+uint8_t frame[matrix_col];
 static uint8_t bitmask;
 /* Private implementation ----------------------------------------------------*/
 
@@ -107,9 +96,9 @@ static void clearLEDMatrix()
 static void update_buffer(uint8_t row)
 {
 #ifdef name_display
-	bitmask = word_32_name[row] >> 24;
+	bitmask = (uint8_t)word_32_name[row] >> 24;
 #else
-	bitmask = charA[row];
+	bitmask = frame[row];
 #endif
 }
 
@@ -118,10 +107,18 @@ static void update_buffer(uint8_t row)
  * @param	num: a 8-bit-long word
  * @retval	a left-shifted 8-bit word
  */
-static uint8_t circular_shift_left(uint8_t num)
+static uint8_t circular_shift_left(uint8_t num, uint8_t isLeft)
 {
-	uint8_t msb = num >> 7;
-	return (num << 1) | msb;
+	if (isLeft)
+	{
+		uint8_t msb = num >> 7;
+		return (num << 1) | msb;
+	}
+	else
+	{
+		uint8_t lsb = num & 1;
+		return (num >> 1) | (lsb << 7);
+	}
 }
 
 /**
@@ -136,6 +133,12 @@ static uint32_t circular_shift_left_32(uint32_t num)
 }
 
 /* Implementation ------------------------------------------------------------*/
+
+void init_frame(uint8_t* ref)
+{
+	for (uint8_t i=0; i < matrix_col; i++)
+		frame[i] = ref[i];
+}
 
 /**
  * @brief	display 1 row of led matrix
@@ -220,10 +223,36 @@ void updateLEDMatrix(uint8_t index)
  * @param	None
  * @retval	None
  */
-void shift_left()
+void shift_left(uint8_t isLeft)
 {
-	for(uint8_t i = 0; i < 8; i++)
-		charA[i] = circular_shift_left(charA[i]);
+	if (isLeft)
+	{
+		for(uint8_t i = 0; i < 8; i++)
+				frame[i] = circular_shift_left(frame[i], isLeft);
+	}
+	else
+	{
+		for(uint8_t i = 0; i < 8; i++)
+				frame[i] = circular_shift_left(frame[i], isLeft);
+	}
+}
+
+void shift_up(uint8_t isUp)
+{
+	if (isUp)
+	{
+		uint8_t mask = frame[0];
+		for (uint8_t i = 0; i < 7; i++)
+			frame[i] = frame[i+1];
+		frame[7] = mask;
+	}
+	else
+	{
+		uint8_t mask = frame[7];
+		for (uint8_t i = 7; i > 0; i--)
+			frame[i] = frame[i-1];
+		frame[0] = mask;
+	}
 }
 
 /**
@@ -235,6 +264,10 @@ void shift_left_32()
 {
 	for(uint8_t i=0; i < 8; i++)
 	{
+#ifdef display_name
 		word_32_name[i] = circular_shift_left_32(word_32_name[i]);
+#endif
+
 	}
 }
+
