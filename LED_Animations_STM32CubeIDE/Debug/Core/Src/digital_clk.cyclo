@@ -1,4 +1,4 @@
-../Core/Src/digital_clk.c:44:6:testClock	3
-../Core/Src/digital_clk.c:53:6:clearAllClock	2
-../Core/Src/digital_clk.c:59:6:setNumberOnClock	1
-../Core/Src/digital_clk.c:64:6:clearNumberOnClock	1
+../Core/Src/digital_clk.c:50:6:testClock	3
+../Core/Src/digital_clk.c:64:6:clearAllClock	2
+../Core/Src/digital_clk.c:75:6:setNumberOnClock	1
+../Core/Src/digital_clk.c:85:6:clearNumberOnClock	1

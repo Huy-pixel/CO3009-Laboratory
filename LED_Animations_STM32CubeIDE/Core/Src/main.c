@@ -107,7 +107,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 #if defined(ex1) || defined(ex2) || defined(ex3) || defined(ex4) || defined(ex5)
   uint8_t counter = 0;
-#ifndef ex1
+#if !defined(ex1) && !defined(ex4)
   uint8_t mask = 0;
 #endif
 #endif /* defined ex1 || ex2 || ex3 || ex4 || ex5 */
@@ -184,7 +184,7 @@ int main(void)
 	  setNumberOnClock(sec/5);
 #endif
 
-	  HAL_Delay(100);
+	  HAL_Delay(1000);
 
 #ifdef dclk
 	  clearNumberOnClock(hour);
