@@ -64,7 +64,7 @@ void testClock(uint8_t counter)
 void clearAllClock()
 {
 	for (uint8_t i = 0; i < 12; i++)
-			HAL_GPIO_WritePin(port[i], pin[i], 0);
+		HAL_GPIO_WritePin(port[i], pin[i], 0);
 }
 
 /**

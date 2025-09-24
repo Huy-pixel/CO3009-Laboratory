@@ -49,6 +49,27 @@ static uint16_t pin[7] =
 		segG_Pin
 };
 
+static GPIO_TypeDef* port_[7] =
+{
+		segA__GPIO_Port,
+		segB__GPIO_Port,
+		segC__GPIO_Port,
+		segD__GPIO_Port,
+		segE__GPIO_Port,
+		segF__GPIO_Port,
+		segG__GPIO_Port
+};
+
+static uint16_t pin_[7] =
+{
+		segA__Pin,
+		segB__Pin,
+		segC__Pin,
+		segD__Pin,
+		segE__Pin,
+		segF__Pin,
+		segG__Pin
+};
 /**
  * A lookup table preserving number not exceed limits
  */
@@ -74,10 +95,18 @@ void Led7seg_Init()
  * @param	A number to display
  * @retval 	None
  */
-void display7SEG(uint8_t num)
+void display7SEG(uint8_t num, uint8_t led)
 {
 	num = dmap[num & 0x0F];	//get 4-last bit, make sure not exceed 0-9
 	uint8_t index = seg_code[num];
-	for (uint8_t i = 0; i<7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? GPIO_PIN_RESET : GPIO_PIN_SET));
+	if (led)
+	{
+		for (uint8_t i = 0; i<7; i++)
+			HAL_GPIO_WritePin(port_[i], pin_[i], ((index & (1 << i)) ? GPIO_PIN_RESET : GPIO_PIN_SET));
+	}
+	else
+	{
+		for (uint8_t i = 0; i<7; i++)
+			HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? GPIO_PIN_RESET : GPIO_PIN_SET));
+	}
 }

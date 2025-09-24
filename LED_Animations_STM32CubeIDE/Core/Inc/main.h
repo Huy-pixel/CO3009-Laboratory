@@ -83,6 +83,14 @@ void Error_Handler(void);
 #define dclk10_GPIO_Port GPIOB
 #define dclk11_Pin GPIO_PIN_11
 #define dclk11_GPIO_Port GPIOB
+#define segD__Pin GPIO_PIN_12
+#define segD__GPIO_Port GPIOB
+#define segE__Pin GPIO_PIN_13
+#define segE__GPIO_Port GPIOB
+#define segF__Pin GPIO_PIN_14
+#define segF__GPIO_Port GPIOB
+#define segG__Pin GPIO_PIN_15
+#define segG__GPIO_Port GPIOB
 #define YELLOW_x_Pin GPIO_PIN_8
 #define YELLOW_x_GPIO_Port GPIOA
 #define GREEN_x_Pin GPIO_PIN_9
@@ -93,6 +101,12 @@ void Error_Handler(void);
 #define YELLOW_y_GPIO_Port GPIOA
 #define GREEN_y_Pin GPIO_PIN_12
 #define GREEN_y_GPIO_Port GPIOA
+#define segA__Pin GPIO_PIN_13
+#define segA__GPIO_Port GPIOA
+#define segB__Pin GPIO_PIN_14
+#define segB__GPIO_Port GPIOA
+#define segC__Pin GPIO_PIN_15
+#define segC__GPIO_Port GPIOA
 #define dclk3_Pin GPIO_PIN_3
 #define dclk3_GPIO_Port GPIOB
 #define dclk4_Pin GPIO_PIN_4

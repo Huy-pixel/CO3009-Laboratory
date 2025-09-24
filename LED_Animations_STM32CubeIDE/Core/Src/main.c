@@ -113,9 +113,9 @@ int main(void)
 #endif /* defined ex1 || ex2 || ex3 || ex4 || ex5 */
 
 #ifdef dclk
-  int hour = 0;
-  int min = 0;
-  int sec = 0;
+  uint8_t hour = 11;
+  uint8_t min = 17;
+  uint8_t sec = 30;
   clearAllClock(); //Initialize digital clock state
 #endif /* dclk */
 
@@ -157,7 +157,7 @@ int main(void)
 
 #elif ex4
 	  if (counter >= 10) counter = 0;
-	  display7SEG(counter++);
+	  display7SEG(counter++, 0);
 
 #elif ex5
 	  if (counter < 3)
@@ -171,7 +171,10 @@ int main(void)
 
 	  Light_Control(mask);
 	  display7SEG((mask & xRED) ? 5 - counter :
-			  	  (mask & xGREEN) ? 8 - counter : 10 - counter);
+			  	  (mask & xGREEN) ? 8 - counter : 10 - counter, 0);
+
+	  display7SEG((mask & yGREEN) ? 3 - counter :
+	  			  (mask & yRED) ? 10 - counter : 5 - counter, 1);
 
 	  counter = (counter + 1) % 10;
 
@@ -269,31 +272,34 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOA, segA_Pin|segB_Pin|segC_Pin|segD_Pin
                           |segE_Pin|segF_Pin|segG_Pin|RED_x_Pin
                           |YELLOW_x_Pin|GREEN_x_Pin|RED_y_Pin|YELLOW_y_Pin
-                          |GREEN_y_Pin, GPIO_PIN_RESET);
+                          |GREEN_y_Pin|segA__Pin|segB__Pin|segC__Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, dclk0_Pin|dclk1_Pin|dclk2_Pin|dclk10_Pin
-                          |dclk11_Pin|dclk3_Pin|dclk4_Pin|dclk5_Pin
+                          |dclk11_Pin|segD__Pin|segE__Pin|segF__Pin
+                          |segG__Pin|dclk3_Pin|dclk4_Pin|dclk5_Pin
                           |dclk6_Pin|dclk7_Pin|dclk8_Pin|dclk9_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : segA_Pin segB_Pin segC_Pin segD_Pin
                            segE_Pin segF_Pin segG_Pin RED_x_Pin
                            YELLOW_x_Pin GREEN_x_Pin RED_y_Pin YELLOW_y_Pin
-                           GREEN_y_Pin */
+                           GREEN_y_Pin segA__Pin segB__Pin segC__Pin */
   GPIO_InitStruct.Pin = segA_Pin|segB_Pin|segC_Pin|segD_Pin
                           |segE_Pin|segF_Pin|segG_Pin|RED_x_Pin
                           |YELLOW_x_Pin|GREEN_x_Pin|RED_y_Pin|YELLOW_y_Pin
-                          |GREEN_y_Pin;
+                          |GREEN_y_Pin|segA__Pin|segB__Pin|segC__Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pins : dclk0_Pin dclk1_Pin dclk2_Pin dclk10_Pin
-                           dclk11_Pin dclk3_Pin dclk4_Pin dclk5_Pin
+                           dclk11_Pin segD__Pin segE__Pin segF__Pin
+                           segG__Pin dclk3_Pin dclk4_Pin dclk5_Pin
                            dclk6_Pin dclk7_Pin dclk8_Pin dclk9_Pin */
   GPIO_InitStruct.Pin = dclk0_Pin|dclk1_Pin|dclk2_Pin|dclk10_Pin
-                          |dclk11_Pin|dclk3_Pin|dclk4_Pin|dclk5_Pin
+                          |dclk11_Pin|segD__Pin|segE__Pin|segF__Pin
+                          |segG__Pin|dclk3_Pin|dclk4_Pin|dclk5_Pin
                           |dclk6_Pin|dclk7_Pin|dclk8_Pin|dclk9_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
