@@ -1,4 +1,0 @@
-../Core/Src/digital_clk.c:50:6:testClock	24	static
-../Core/Src/digital_clk.c:64:6:clearAllClock	16	static
-../Core/Src/digital_clk.c:75:6:setNumberOnClock	16	static
-../Core/Src/digital_clk.c:85:6:clearNumberOnClock	16	static
