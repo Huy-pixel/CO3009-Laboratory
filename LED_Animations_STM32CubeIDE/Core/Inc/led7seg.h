@@ -15,6 +15,6 @@
 
 /* Function prototypes -------------------------------------------------------*/
 void Led7seg_Init();
-void display7SEG(uint8_t num, uint8_t led);
+void display7SEG(uint8_t num, uint8_t index_led);
 
 #endif /* INC_LED7SEG_H_ */

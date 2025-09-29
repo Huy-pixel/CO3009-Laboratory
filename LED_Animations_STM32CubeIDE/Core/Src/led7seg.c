@@ -76,7 +76,7 @@ static uint16_t pin_[7] =
 static const uint8_t dmap[16] =
 {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	// 0-9
-		0, 1, 2, 3, 4, 5				// 10-15
+		0, 0, 0, 0, 0, 0				// 10-15
 };
 /* Private code --------------------------------------------------------------*/
 /**
@@ -93,13 +93,14 @@ void Led7seg_Init()
 /**
  * @brief	Display 7-segment LED at a time
  * @param	A number to display
+ * 			index_led: choose LED which is displayed
  * @retval 	None
  */
-void display7SEG(uint8_t num, uint8_t led)
+void display7SEG(uint8_t num, uint8_t index_led)
 {
 	num = dmap[num & 0x0F];	//get 4-last bit, make sure not exceed 0-9
 	uint8_t index = seg_code[num];
-	if (led)
+	if (index_led)
 	{
 		for (uint8_t i = 0; i<7; i++)
 			HAL_GPIO_WritePin(port_[i], pin_[i], ((index & (1 << i)) ? GPIO_PIN_RESET : GPIO_PIN_SET));

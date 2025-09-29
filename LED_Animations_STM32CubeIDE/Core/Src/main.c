@@ -44,12 +44,18 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define t_RED 		9U	/*RED light interval */
+#define t_GREEN		8U	/* GREEN light */
+#define t_YELLOW	3U	/* YELLOW light */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define init_state				0U
+#define xRED_yGREEN_state		xRED 	| yGREEN
+#define xRED_yYELLOW_state		xRED 	| yYELLOW
+#define xGREEN_yRED_state		xGREEN 	| yRED
+#define xYELLOW_yRED_state		xYELLOW | yRED
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -106,9 +112,10 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 #if defined(ex1) || defined(ex2) || defined(ex3) || defined(ex4) || defined(ex5)
-  uint8_t counter = 0;
+  uint8_t amber_green_countdown;
+  uint8_t red_countdown;
 #if !defined(ex1) && !defined(ex4)
-  uint8_t mask = 0;
+  uint8_t state = init_state;
 #endif
 #endif /* defined ex1 || ex2 || ex3 || ex4 || ex5 */
 
@@ -160,24 +167,51 @@ int main(void)
 	  display7SEG(counter++, 0);
 
 #elif ex5
-	  if (counter < 3)
-		  mask = xRED | yGREEN;
-	  else if (counter < 5)
-		  mask = xRED | yYELLOW;
-	  else if (counter < 8)
-		  mask = yRED | xGREEN;
-	  else
-		  mask = yRED | xYELLOW;
-
-	  Light_Control(mask);
-	  display7SEG((mask & xRED) ? 5 - counter :
-			  	  (mask & xGREEN) ? 8 - counter : 10 - counter, 0);
-
-	  display7SEG((mask & yGREEN) ? 3 - counter :
-	  			  (mask & yRED) ? 10 - counter : 5 - counter, 1);
-
-	  counter = (counter + 1) % 10;
-
+	  switch(state)
+	  {
+	  case (init_state):
+			  amber_green_countdown = t_GREEN;
+	  	  	  red_countdown = t_RED;
+	  	  	  state = xRED_yGREEN_state;
+			  continue;
+	  case (xRED_yGREEN_state):
+			  if (amber_green_countdown <= 0)
+			  {
+				  amber_green_countdown = t_YELLOW;
+				  state = xRED_yYELLOW_state;
+			  }
+			  break;
+	  case (xRED_yYELLOW_state):
+			  if (amber_green_countdown <= 0)
+			  {
+				  amber_green_countdown = t_GREEN;
+				  red_countdown = t_RED;
+				  state = xGREEN_yRED_state;
+			  }
+			  break;
+	  case (xGREEN_yRED_state):
+			  if (amber_green_countdown <= 0)
+			  {
+				  amber_green_countdown = t_YELLOW;
+				  state = xYELLOW_yRED_state;
+			  }
+			  break;
+	  case (xYELLOW_yRED_state):
+			  if (amber_green_countdown <= 0)
+			  {
+				  amber_green_countdown = t_GREEN;
+				  red_countdown = t_RED;
+				  state = xRED_yGREEN_state;
+			  }
+			  break;
+	  default:
+		  break;
+	  }
+	  Light_Control(state);
+	  display7SEG(amber_green_countdown, (state & xRED) ? 1 : 0);
+	  display7SEG(red_countdown, (state & xRED) ? 0 : 1);
+	  amber_green_countdown--;
+	  red_countdown--;
 #elif ex6
 	  testClock(counter++);
 
