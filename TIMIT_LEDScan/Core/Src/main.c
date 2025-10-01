@@ -108,11 +108,13 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_Base_Start_IT(&htim2);
-  //setTimer(1000, 0);
-  setTimer(13, 1);
-  setTimer(500, 2);
+  software_timer_init();
+  //uint8_t intr0 = setTimer(1000);
+  uint8_t intr1 = setTimer(10, PERIODIC);
+  uint8_t intr2 = setTimer(500, PERIODIC);
+  uint8_t flag;
   uint8_t index_led = 0;
-  uint8_t cyc = 0;
+  //uint8_t cyc = 0;
   init_frame(charA);
   /* USER CODE END 2 */
 
@@ -120,58 +122,66 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  flag = isTimer_expired();
 	  /* An interval of 1 second */
-	  if (pTIM_flag[0] == 1)
-	  {
-		  setTimer(1000, 0);
-		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+//	  if (flag == intr1)
+//	  {
+//		  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+//		  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+//
+//		  second++;
+//		  if (second >= 60)
+//		  {
+//			  second = 0;
+//			  minute++;
+//		  }
+//		  if( minute >= 60)
+//		  {
+//			  minute = 0;
+//			  hour ++;
+//		  }
+//		  if( hour >=24)
+//		  {
+//			  hour = 0;
+//		  }
+//		  updateClockBuffer();
+//	  }
 
-		  second++;
-		  if (second >= 60)
-		  {
-			  second = 0;
-			  minute++;
-		  }
-		  if( minute >= 60)
-		  {
-			  minute = 0;
-			  hour ++;
-		  }
-		  if( hour >=24)
-		  {
-			  hour = 0;
-		  }
-		  updateClockBuffer();
-	  }
-
-	  /* An interval of 13ms */
-	  if (pTIM_flag[1] == 1)
+//	  switch(flag)
+//	  {
+//	  case (1):
+//		clear_flag();
+//		updateLEDMatrix(index_led);
+//		index_led = (index_led + 1) & 7;
+//		break;
+//	  case (2):
+//		clear_flag();
+//	  }
+	  if (flag == intr1)
 	  {
-		  setTimer(13, 1);
+		  clear_flag();
 		  updateLEDMatrix(index_led);
 		  index_led = (index_led + 1) & 7;
 	  }
-
-	  if (pTIM_flag[2] == 1)
+	  if (flag == intr2)
 	  {
-		  setTimer(500, 2);
+		  clear_flag();
+		  shift_left(0);
+	  }
 		  //update7SEG(index_led);
 #ifdef name_display
 		  shift_left_32();
 #else
-		  cyc = (cyc + 1) % 33;
-		  if (cyc < 9)
-			  shift_left(1);
-		  else if (cyc < 17)
-			  shift_left(0);
-		  else if (cyc < 25)
-			  shift_up(1);
-		  else
-			  shift_up(0);
+//		  cyc = (cyc + 1) % 33;
+//		  if (cyc < 9)
+//			  shift_left(1);
+//		  else if (cyc < 17)
+//			  shift_left(0);
+//		  else if (cyc < 25)
+//			  shift_up(1);
+//		  else
+//			  shift_up(0);
 #endif
-	  }
-
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -368,9 +378,7 @@ void updateClockBuffer()
 
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-	timer_run(0);
-	timer_run(1);
-	timer_run(2);
+	timer_run();
 }
 
 /* USER CODE END 4 */

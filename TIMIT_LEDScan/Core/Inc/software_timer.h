@@ -10,12 +10,22 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
+#include "stddef.h"
+/* Defines -------------------------------------------------------------------*/
+typedef enum {
+	ONESHOT = 0U,
+	PERIODIC
+}TIMER_TYPE;
 
-/* Exported Variables --------------------------------------------------------*/
-extern uint8_t  pTIM_flag[];
+#define MAX_TIMER 10U	/* Configures number of timers for timer pool */
+#define TIMER_CYCLE 10U /* The hardware-timer cycle, in milliseconds;
+ 	 	 	 	 	 	   Please refers to "STM32 Timers configuration" to set this up correctly */
 
 /* Function prototypes -------------------------------------------------------*/
-void setTimer(uint16_t duration, uint8_t index);
-void timer_run(uint8_t index);
+void software_timer_init(void);
+uint8_t setTimer(uint16_t duration, TIMER_TYPE type);
+uint8_t isTimer_expired(void);
+void clear_flag(void);
+void timer_run(void);
 
 #endif /* INC_SOFTWARE_TIMER_H_ */
