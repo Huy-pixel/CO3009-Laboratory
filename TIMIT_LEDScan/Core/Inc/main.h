@@ -46,7 +46,7 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define TIMER_CYCLE 10U
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

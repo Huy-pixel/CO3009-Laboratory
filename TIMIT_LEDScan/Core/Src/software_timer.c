@@ -1,7 +1,7 @@
 /*
  * @file:	software_timer.c
  * @brief: 	software-timer source file
- * @Note:	The author uses this TIM2 as base sys-tick for a number of software-timer counters
+ * @Note:	The author uses TIM2 as base sys-tick for a number of software-timer counters
  * 				hereinafter referred to as timer pool
  *  Created on: Sep 9, 2025
  *      Author: soaic
@@ -10,26 +10,135 @@
 /* Private includes ----------------------------------------------------------*/
 #include "software_timer.h"
 
-/* Timer's components ------------------------------------------------*/
+/* Timer_type definition -----------------------------------------------------*/
 typedef struct timer_t timer_t;
 
 struct timer_t
 {
 	/* Timer type components */
-	uint8_t id; 			/* timer id: user can define up to 255 timers, 0 is preserved */
-	uint16_t countdown; 	/* timer's duration */
-	uint16_t default_counter;		/* default duration */
-	TIMER_TYPE type;
-	timer_t* next; 			/* pointer to the next timer */
+	uint8_t id; 				/* timer id: user can define up to 255 timers, 0 is preserved for flag */
+	uint16_t countdown; 		/* timer's duration
+							 	 * if using unsigned integer 16 bit, countdown can range from 0->65536 (2^16)
+							 	 * if using signed	 integer 16 bit, countdown can range from -32768->32768 (2^15, 1 bit for sign)
+							 	 */
+	uint16_t period;			/* timer's period, used for reload countdown
+	 	 	 	 	 	 	 	 * a PERIODIC timer has this attribute none zero, whereas a ONESHOT does not
+	 	 	 	 	 	 	 	 */
+	timer_t* next; 				/* pointer to the next timer */
 };
 
-static timer_t timer_pool[MAX_TIMER];			/* a software-timer pool with 10 timers available */
-static uint8_t timer_seedID = 1;
-timer_t* timer_head;	/* pointer to the active list */
-timer_t* free_list;		/* pointer to the free list */
-static uint8_t flag;
-/* Software-timer's implementation ----------------------------------------------------*/
+/* Software-timer components --------------------------------------------------*/
+static timer_t timer_pool[MAX_TIMER];	/* a software-timer pool with 10 timers available */
+static uint8_t timer_seedID = 1;		/* seed for generate timer's id , 0 is preserved for flag*/
+static timer_t* timer_head;				/* pointer to the active list */
+static timer_t* free_list;				/* pointer to the free list */
+static uint8_t flag;					/* global flag of software timer */
 
+/* Singly linked list methods forward declaration ----------------------------*/
+timer_t* timer_fetch_free_slot(void);
+timer_t* timer_construct(uint16_t delay, uint16_t period);
+void timer_destruct(timer_t* timer);
+void timer_add_to_list(timer_t* timer, timer_t* *head);
+timer_t* timer_delete_head(timer_t* *head);
+void timer_raise_flag(timer_t* timer_head);
+
+/* Private implementation ----------------------------------------------------*/
+
+/*
+ * This procedure fetch for free slot in free list, lead by pointer free_list
+ */
+timer_t* timer_fetch_free_slot(void)
+{
+	if (free_list == NULL) /* No more free slot */
+		return NULL;
+	timer_t* slot = free_list;
+	free_list = free_list->next;
+	slot->next = NULL;
+	return slot;
+}
+
+/**
+ * timer_t object constructor
+ */
+timer_t* timer_construct(uint16_t delay, uint16_t period)
+{
+	timer_t* timer = timer_fetch_free_slot();
+	if (timer == NULL) /* fetch free slot fail */
+		return NULL;
+
+	timer->id = timer_seedID++;
+	timer->countdown = delay;
+	timer->period = period;
+	timer->next = NULL;
+	return timer;
+}
+
+/**
+ * timer_t object destructor
+ */
+void timer_destruct(timer_t* timer)
+{
+	if (!timer)
+		return;
+	timer->next = free_list;
+	free_list = timer;
+}
+
+/**
+ * Add a new timer into active list, lead by pointer timer_head
+ */
+void timer_add_to_list(timer_t* timer, timer_t* *head)
+{
+	if (!timer || !head)
+		return;
+	timer->next = NULL;
+
+	timer_t* *current = head;
+	while (*current != NULL && timer->countdown >= (*current)->countdown) /* the equals here is important */
+	{
+		timer->countdown -= (*current)->countdown;
+		current = &(*current)->next;
+	}
+
+	/* while break means current is NULL also means it is the last one
+	 * or timer is at right place also means it is right before the current */
+	if (*current != NULL)
+	{
+		(*current)->countdown -= timer->countdown;
+	}
+
+	timer->next = *current;
+	*current = timer;
+}
+
+/*
+ * Delete head of active list, because it's always the head expires
+ */
+timer_t* timer_delete_head(timer_t* *head)
+{
+	if (!head || !(*head))
+		return NULL;
+	timer_t* victim = *head;
+	*head = (*head)->next;
+	victim->next = NULL;
+	return victim;
+}
+
+/*
+ * Set the global flag by id of the timer expires
+ */
+void timer_raise_flag(timer_t* timer_head)
+{
+	flag = timer_head->id;
+}
+
+/* Software-timer API --------------------------------------------------------*/
+
+/**
+ * @brief	Setup software-timer memory pool
+ * @param	None
+ * @reval	None
+ */
 void software_timer_init(void)
 {
 	for (int i = 0; i < MAX_TIMER - 1; i++)
@@ -40,118 +149,90 @@ void software_timer_init(void)
 	free_list = &timer_pool[0];
 }
 
-timer_t* timer_construct(uint16_t counter, TIMER_TYPE type)
-{
-	if (free_list == NULL) {
-	        return NULL;
-	}
-	timer_t* timer = free_list;
-	free_list = free_list->next;
-
-	timer->id = timer_seedID++;
-	timer->countdown = counter;
-	timer->default_counter = counter;
-	timer->type = type;
-	timer->next = NULL;
-	return timer;
-}
-
-void timer_destruct(timer_t* timer)
-{
-	timer->next = free_list;
-	free_list = timer;
-}
-
-void timer_add_to_list(timer_t* timer, timer_t* *head)
-{
-	/* If active list is empty */
-	if (*head == NULL)
-	{
-		*head = timer;
-		timer->next = NULL;
-		return;
-	}
-
-	if (timer->countdown <= (*head)->countdown)
-	{
-		(*head)->countdown -= timer->countdown;
-		timer->next = *head;
-		*head = timer;
-		return;
-	}
-
-	timer->countdown -= (*head)->countdown;
-	timer_add_to_list(timer, &((*head)->next));
-}
-
-timer_t* timer_delete_from_list(timer_t* head)
-{
-	timer_t* victim = head;
-	head = head->next;
-	victim->next = NULL;
-	return victim;
-}
-
-void timer_raise_flag(timer_t* timer_head)
-{
-	flag = timer_head->id;
-}
-
 /**
- * @brief	set timer interval of which is being used
- * @param	duration: timer's duration, must be a multiple of TIMER_CYCLE
- * 			index: index of timer being used in timer pool, must be in range of [0, MAX_TIMER]
- * @retval	None
+ * @brief	Set up new timer with delay and period
+ * @param	delay:  time before timer goes off when this API calls
+ * 			period: time between a single time the timer goes off after the first expiration
+ * @note	through the combined use of delay and period, user can set up either PERIODIC or ONESHOT timer
+ * 			e.g: a ONESHOT timer has period value equals zero, whereas PERIODIC does not.
+ * @retval	the timer's id
  */
-uint8_t setTimer(uint16_t interval, TIMER_TYPE type)
+uint8_t setTimer(uint16_t delay, uint16_t period)
 {
-	uint16_t timer_counter = interval/TIMER_CYCLE;
-	timer_t* instance = timer_construct(timer_counter, type);
+	if (!delay && !period)				/* user define a null timer */
+		return 0;
+	if (!delay)
+		delay += TIMER_CYCLE; 			/* 0 in users perspective means no delay, but for timer_run() logic, no delay must be value as 1 */
+
+	timer_t* instance = timer_construct(delay/TIMER_CYCLE, period/TIMER_CYCLE);
+	if (!instance)
+		return 0;
+
 	timer_add_to_list(instance, &timer_head);
 	return instance->id;
 }
 
 /**
- * @brief	run software-timer
- * @param	index: index of timer being used in timer pool, must be in range of [0, MAX_TIMER]
- * @note
+ * @brief	Clear software-timer's flag
+ * @param	None
+ * @retval	None
+ * @note	This function clear flag at first, a flag is cleared when it is expired.
+ * 			Thus, this procedure do either delete a ONESHOT timer or move a PERIODIC
+ * 			into its place in list.
+ */
+void clear_flag(void)
+{
+	flag = 0;
+
+	timer_t* expire = timer_delete_head(&timer_head);
+
+	if (expire->period)
+	{
+		expire->countdown = expire->period;			/* reload PERIODIC timer's countdown */
+		timer_add_to_list(expire, &timer_head);		/* move to its place */
+	}
+	else
+	{
+		timer_destruct(expire);						/* destruct an expire one */
+	}
+
+	/* Re-check the following whether it expires */
+	if (timer_head->countdown <= 0)
+		timer_raise_flag(timer_head);
+}
+
+/**
+ * @brief	Get software-timer global flag
+ * @param	None
+ * @retval	None
+ */
+uint8_t get_flag(void)
+{
+	return flag;
+}
+
+/**
+ * @brief	Run the software-timer
+ * @param	None
  * @retval	None
  */
 void timer_run(void)
 {
+	if (!timer_head) return;	/* No timer is used */
+
 	if (timer_head->countdown > 0)
 	{
 		timer_head->countdown--;
-		if (timer_head->countdown == 0)
+		if (timer_head->countdown <= 0)
 			timer_raise_flag(timer_head);
 	}
 }
 
-uint8_t isTimer_expired(void)
+/*
+ * Interrupt Service Routines (ISR)
+ * This function invoke by hardware
+ */
+void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-	if (flag)
-	{
-		timer_t* sample = timer_delete_from_list(timer_head);
-
-		if (sample->type == PERIODIC)
-		{
-			sample->countdown = sample->default_counter;
-			timer_add_to_list(sample, &timer_head);
-		}
-		else
-		{
-			timer_destruct(sample);
-		}
-	}
-	return flag;
+	timer_run();
 }
-
-void clear_flag(void)
-{
-	flag = 0;
-}
-
-
-
-
-

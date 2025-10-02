@@ -9,22 +9,17 @@
 #define INC_SOFTWARE_TIMER_H_
 
 /* Includes ------------------------------------------------------------------*/
-#include "stdint.h"
-#include "stddef.h"
+#include "main.h"
 /* Defines -------------------------------------------------------------------*/
-typedef enum {
-	ONESHOT = 0U,
-	PERIODIC
-}TIMER_TYPE;
-
-#define MAX_TIMER 10U	/* Configures number of timers for timer pool */
-#define TIMER_CYCLE 10U /* The hardware-timer cycle, in milliseconds;
- 	 	 	 	 	 	   Please refers to "STM32 Timers configuration" to set this up correctly */
-
+#define MAX_TIMER 	10U		/* Configures number of timers for timer pool */
+#ifndef TIMER_CYCLE
+#define TIMER_CYCLE 1U 		/* The hardware-timer cycle, in milliseconds;
+ 	 	 	 	 	 	   	   Please refers to "STM32 Timers configuration" to set this up correctly */
+#endif
 /* Function prototypes -------------------------------------------------------*/
 void software_timer_init(void);
-uint8_t setTimer(uint16_t duration, TIMER_TYPE type);
-uint8_t isTimer_expired(void);
+uint8_t setTimer(uint16_t delay, uint16_t period);
+uint8_t get_flag(void);
 void clear_flag(void);
 void timer_run(void);
 
