@@ -39,6 +39,7 @@ void timer_add_to_list(timer_t* timer, timer_t* *head);
 timer_t* timer_delete_head(timer_t* *head);
 void timer_raise_flag(timer_t* timer_head);
 void timer_memory_pool_init(void);
+void timer_run(void);
 /* Private implementation ----------------------------------------------------*/
 
 /*
@@ -142,6 +143,22 @@ void timer_memory_pool_init(void)
 	free_list = &timer_pool[0];
 }
 
+/**
+ * @brief	Run the software-timer
+ * @param	None
+ * @retval	None
+ */
+void timer_run(void)
+{
+	if (!timer_head) return;	/* No timer is used */
+
+	if (timer_head->countdown > 0)
+	{
+		timer_head->countdown--;
+		if (timer_head->countdown <= 0)
+			timer_raise_flag(timer_head);
+	}
+}
 /* Software-timer API --------------------------------------------------------*/
 
 /**
@@ -217,26 +234,9 @@ uint8_t get_flag(void)
 	return flag;
 }
 
-/**
- * @brief	Run the software-timer
- * @param	None
- * @retval	None
- */
-void timer_run(void)
-{
-	if (!timer_head) return;	/* No timer is used */
-
-	if (timer_head->countdown > 0)
-	{
-		timer_head->countdown--;
-		if (timer_head->countdown <= 0)
-			timer_raise_flag(timer_head);
-	}
-}
-
 /*
  * Interrupt Service Routines (ISR)
- * This function invoke by hardware
+ * This function is invoked by hardware
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {

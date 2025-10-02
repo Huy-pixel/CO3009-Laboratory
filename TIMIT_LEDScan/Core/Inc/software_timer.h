@@ -23,6 +23,5 @@ void software_timer_init(void);
 uint8_t setTimer(uint16_t delay, uint16_t period);
 uint8_t get_flag(void);
 void clear_flag(void);
-void timer_run(void);
 
 #endif /* INC_SOFTWARE_TIMER_H_ */
