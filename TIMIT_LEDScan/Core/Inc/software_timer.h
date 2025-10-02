@@ -10,8 +10,10 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "tim.h"
 /* Defines -------------------------------------------------------------------*/
-#define MAX_TIMER 	10U		/* Configures number of timers for timer pool */
+#define MAX_TIMER 	10U		/* Configures number of timers for timer memory pool
+ 	 	 	 	 	 	 	   This can range on use purposes, depends on on-chip flash and RAM */
 #ifndef TIMER_CYCLE
 #define TIMER_CYCLE 1U 		/* The hardware-timer cycle, in milliseconds;
  	 	 	 	 	 	   	   Please refers to "STM32 Timers configuration" to set this up correctly */

@@ -1,8 +1,6 @@
 /*
  * @file:	software_timer.c
  * @brief: 	software-timer source file
- * @Note:	The author uses TIM2 as base sys-tick for a number of software-timer counters
- * 				hereinafter referred to as timer pool
  *  Created on: Sep 9, 2025
  *      Author: soaic
  */
@@ -15,7 +13,6 @@ typedef struct timer_t timer_t;
 
 struct timer_t
 {
-	/* Timer type components */
 	uint8_t id; 				/* timer id: user can define up to 255 timers, 0 is preserved for flag */
 	uint16_t countdown; 		/* timer's duration
 							 	 * if using unsigned integer 16 bit, countdown can range from 0->65536 (2^16)
@@ -34,14 +31,14 @@ static timer_t* timer_head;				/* pointer to the active list */
 static timer_t* free_list;				/* pointer to the free list */
 static uint8_t flag;					/* global flag of software timer */
 
-/* Singly linked list methods forward declaration ----------------------------*/
+/* Singly linked list method-like functions forward declaration --------------*/
 timer_t* timer_fetch_free_slot(void);
 timer_t* timer_construct(uint16_t delay, uint16_t period);
 void timer_destruct(timer_t* timer);
 void timer_add_to_list(timer_t* timer, timer_t* *head);
 timer_t* timer_delete_head(timer_t* *head);
 void timer_raise_flag(timer_t* timer_head);
-
+void timer_memory_pool_init(void);
 /* Private implementation ----------------------------------------------------*/
 
 /*
@@ -132,14 +129,10 @@ void timer_raise_flag(timer_t* timer_head)
 	flag = timer_head->id;
 }
 
-/* Software-timer API --------------------------------------------------------*/
-
-/**
- * @brief	Setup software-timer memory pool
- * @param	None
- * @reval	None
+/*
+ * Setup timer_t memory pool
  */
-void software_timer_init(void)
+void timer_memory_pool_init(void)
 {
 	for (int i = 0; i < MAX_TIMER - 1; i++)
 	{
@@ -147,6 +140,19 @@ void software_timer_init(void)
 	}
 	timer_pool[MAX_TIMER - 1].next = NULL;
 	free_list = &timer_pool[0];
+}
+
+/* Software-timer API --------------------------------------------------------*/
+
+/**
+ * @brief	Initialize hardware TIM2 by HAL and memory pool
+ * @param	None
+ * @reval	None
+ */
+void software_timer_init(void)
+{
+	HAL_TIM_Base_Start_IT(&htim2);
+	timer_memory_pool_init();
 }
 
 /**
