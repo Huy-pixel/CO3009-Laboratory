@@ -9,58 +9,58 @@
 #include "led_matrix.h"
 
 /* Private defines -----------------------------------------------------------*/
-#define matrix_row 8
-#define matrix_col 8
+
 
 /* Private variables ---------------------------------------------------------*/
-static GPIO_TypeDef* column_port[8] =
+static GPIO_TypeDef* column_port_array[8] =
 {
-		ENM0_GPIO_Port,
-		ENM1_GPIO_Port,
-		ENM2_GPIO_Port,
-		ENM3_GPIO_Port,
-		ENM4_GPIO_Port,
-		ENM5_GPIO_Port,
-		ENM6_GPIO_Port,
-		ENM7_GPIO_Port
+		COL0_port,
+		COL1_port,
+		COL2_port,
+		COL3_port,
+		COL4_port,
+		COL5_port,
+		COL6_port,
+		COL7_port
 };
 
-static GPIO_TypeDef* row_port[8] =
+static GPIO_TypeDef* row_port_array[8] =
 {
-		ROW0_GPIO_Port,
-		ROW1_GPIO_Port,
-		ROW2_GPIO_Port,
-		ROW3_GPIO_Port,
-		ROW4_GPIO_Port,
-		ROW5_GPIO_Port,
-		ROW6_GPIO_Port,
-		ROW7_GPIO_Port
+		ROW0_port,
+		ROW1_port,
+		ROW2_port,
+		ROW3_port,
+		ROW4_port,
+		ROW5_port,
+		ROW6_port,
+		ROW7_port
 };
 
-static uint16_t column_pin[8] =
+static uint16_t column_pin_array[8] =
 {
-		ENM0_Pin,
-		ENM1_Pin,
-		ENM2_Pin,
-		ENM3_Pin,
-		ENM4_Pin,
-		ENM5_Pin,
-		ENM6_Pin,
-		ENM7_Pin
+		COL0_pin,
+		COL1_pin,
+		COL2_pin,
+		COL3_pin,
+		COL4_pin,
+		COL5_pin,
+		COL6_pin,
+		COL7_pin
 };
 
-static uint16_t row_pin[8] =
+static uint16_t row_pin_array[8] =
 {
-		ROW0_Pin,
-		ROW1_Pin,
-		ROW2_Pin,
-		ROW3_Pin,
-		ROW4_Pin,
-		ROW5_Pin,
-		ROW6_Pin,
-		ROW7_Pin
+		ROW0_pin,
+		ROW1_pin,
+		ROW2_pin,
+		ROW3_pin,
+		ROW4_pin,
+		ROW5_pin,
+		ROW6_pin,
+		ROW7_pin
 };
 
+#ifdef name_display
 static uint32_t word_32_name[matrix_row] =
 {
 		0b01100110011001100110011000000000,
@@ -72,8 +72,9 @@ static uint32_t word_32_name[matrix_row] =
 		0b01100110011001100001100000000000,
 		0b01100110001111000001100000000000
 };
+#endif
 
-uint8_t frame[matrix_col];
+uint8_t frame[matrix_row];
 static uint8_t bitmask;
 /* Private implementation ----------------------------------------------------*/
 
@@ -81,11 +82,24 @@ static uint8_t bitmask;
  * @brief	clear LED matrix by pull high all cathode pin
  * @param	None
  * @retval	None
+ * @note	In order to clear all LED, deactive all row pin
  */
 static void clearLEDMatrix()
 {
-	for (uint8_t i = 0; i < 8; i++)
-		HAL_GPIO_WritePin(row_port[i], row_pin[i], 1);
+	for (uint8_t i = 0; i < matrix_row; i++)
+		HAL_GPIO_WritePin(row_port_array[i], row_pin_array[i], row_reset);
+}
+
+/**
+ * @brief 	Display 1 one row of LED_Matrix, used for LED scanning
+ * @param 	row index
+ * @retval	None
+ */
+static void display_row(uint8_t row)
+{
+	HAL_GPIO_WritePin(row_port_array[row], row_pin_array[row], row_set); /* Active desire row */
+	for (int8_t i = matrix_col - 1; i >= 0; i--)
+		HAL_GPIO_WritePin(column_port_array[i], column_pin_array[i], (bitmask & (1 << i)) ? column_set : column_reset);
 }
 
 /**
@@ -111,16 +125,17 @@ static uint8_t circular_shift_left(uint8_t num, uint8_t isLeft)
 {
 	if (isLeft)
 	{
-		uint8_t msb = num >> 7;
+		uint8_t msb = num >> (matrix_col - 1);
 		return (num << 1) | msb;
 	}
 	else
 	{
 		uint8_t lsb = num & 1;
-		return (num >> 1) | (lsb << 7);
+		return (num >> 1) | (lsb << (matrix_col - 1));
 	}
 }
 
+#ifdef name_display
 /**
  * @brief	circular shift a 32-bit word left
  * @param	num: a 32-bit-long word
@@ -131,12 +146,13 @@ static uint32_t circular_shift_left_32(uint32_t num)
 	uint8_t msb = num >> 31;
 	return (num << 1) | msb;
 }
+#endif
 
 /* Implementation ------------------------------------------------------------*/
 
 void init_frame(uint8_t* ref)
 {
-	for (uint8_t i=0; i < matrix_col; i++)
+	for (uint8_t i=0; i < matrix_row; i++)
 		frame[i] = ref[i];
 }
 
@@ -153,67 +169,35 @@ void updateLEDMatrix(uint8_t index)
 	{
 	case 0:
 		update_buffer(0); // get a string to display in row 1
-
-		HAL_GPIO_WritePin(row_port[0], row_pin[0], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(0);
 		break;
 	case 1:
 		update_buffer(1); // get a string to display in row 2
-
-		HAL_GPIO_WritePin(row_port[1], row_pin[1], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(1);
 		break;
 	case 2:
 		update_buffer(2); // get a string to display in row 3
-
-		HAL_GPIO_WritePin(row_port[2], row_pin[2], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(2);
 		break;
 	case 3:
 		update_buffer(3); // get a string to display in row 4
-
-		HAL_GPIO_WritePin(row_port[3], row_pin[3], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(3);
 		break;
 	case 4:
 		update_buffer(4); // get a string to display in row 5
-
-		HAL_GPIO_WritePin(row_port[4], row_pin[4], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(4);
 		break;
 	case 5:
 		update_buffer(5); // get a string to display in row 6
-
-		HAL_GPIO_WritePin(row_port[5], row_pin[5], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(5);
 		break;
 	case 6:
 		update_buffer(6); // get a string to display in row 7
-
-		HAL_GPIO_WritePin(row_port[6], row_pin[6], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(6);
 		break;
 	case 7:
 		update_buffer(7); // get a string to display in row 8
-
-		HAL_GPIO_WritePin(row_port[7], row_pin[7], 0);
-
-		for (uint8_t i = 0; i < 8; i++)
-			HAL_GPIO_WritePin(column_port[i], column_pin[i], (bitmask & (1 << i)) ? 0 : 1);
+		display_row(7);
 		break;
 	}
 }
@@ -227,12 +211,12 @@ void shift_left(uint8_t isLeft)
 {
 	if (isLeft)
 	{
-		for(uint8_t i = 0; i < 8; i++)
+		for(uint8_t i = 0; i < matrix_row; i++)
 				frame[i] = circular_shift_left(frame[i], isLeft);
 	}
 	else
 	{
-		for(uint8_t i = 0; i < 8; i++)
+		for(uint8_t i = 0; i < matrix_row; i++)
 				frame[i] = circular_shift_left(frame[i], isLeft);
 	}
 }
@@ -241,20 +225,21 @@ void shift_up(uint8_t isUp)
 {
 	if (isUp)
 	{
-		uint8_t mask = frame[0];
-		for (uint8_t i = 0; i < 7; i++)
+		uint8_t first = frame[0];
+		for (uint8_t i = 0; i < matrix_row - 1; i++)
 			frame[i] = frame[i+1];
-		frame[7] = mask;
+		frame[matrix_row - 1] = first;
 	}
 	else
 	{
-		uint8_t mask = frame[7];
-		for (uint8_t i = 7; i > 0; i--)
+		uint8_t last = frame[matrix_row - 1];
+		for (uint8_t i = matrix_row - 1; i > 0; i--)
 			frame[i] = frame[i-1];
-		frame[0] = mask;
+		frame[0] = last;
 	}
 }
 
+#ifdef display_name
 /**
  * @brief	shift left a 32-bit long on 8x8 led matrix
  * @param	None
@@ -264,10 +249,8 @@ void shift_left_32()
 {
 	for(uint8_t i=0; i < 8; i++)
 	{
-#ifdef display_name
-		word_32_name[i] = circular_shift_left_32(word_32_name[i]);
-#endif
 
+		word_32_name[i] = circular_shift_left_32(word_32_name[i]);
 	}
 }
-
+#endif

@@ -8,6 +8,9 @@
 /* Private includes ----------------------------------------------------------*/
 #include "led7seg.h"
 
+/* Refer to hardware for compatible state */
+#define led_set 	0U
+#define led_reset	1U
 /* Private variables ----------------------------------------------------------*/
 
 /**
@@ -80,5 +83,5 @@ void display7SEG(uint8_t num)
 	num = dmap[num & 0x0F];	//get 4-last bit in order to not exceeding [0;9]
 	uint8_t index = seg_code[num];
 	for (uint8_t i = 0; i<7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? GPIO_PIN_RESET : GPIO_PIN_SET));
+		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? led_set : led_reset));
 }

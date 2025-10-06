@@ -44,10 +44,10 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, ENM0_Pin|ENM1_Pin|DOT_Pin|LED_Pin
+  HAL_GPIO_WritePin(GPIOA, COL0_Pin|COL1_Pin|DOT_Pin|LED_Pin
                           |EN0_Pin|EN1_Pin|EN2_Pin|EN3_Pin
-                          |ENM2_Pin|ENM3_Pin|ENM4_Pin|ENM5_Pin
-                          |ENM6_Pin|ENM7_Pin, GPIO_PIN_RESET);
+                          |COL2_Pin|COL3_Pin|COL4_Pin|COL5_Pin
+                          |COL6_Pin|COL7_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, SEG0_Pin|SEG1_Pin|SEG2_Pin|ROW2_Pin
@@ -55,14 +55,14 @@ void MX_GPIO_Init(void)
                           |ROW7_Pin|SEG3_Pin|SEG4_Pin|SEG5_Pin
                           |SEG6_Pin|ROW0_Pin|ROW1_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : ENM0_Pin ENM1_Pin DOT_Pin LED_Pin
+  /*Configure GPIO pins : COL0_Pin COL1_Pin DOT_Pin LED_Pin
                            EN0_Pin EN1_Pin EN2_Pin EN3_Pin
-                           ENM2_Pin ENM3_Pin ENM4_Pin ENM5_Pin
-                           ENM6_Pin ENM7_Pin */
-  GPIO_InitStruct.Pin = ENM0_Pin|ENM1_Pin|DOT_Pin|LED_Pin
+                           COL2_Pin COL3_Pin COL4_Pin COL5_Pin
+                           COL6_Pin COL7_Pin */
+  GPIO_InitStruct.Pin = COL0_Pin|COL1_Pin|DOT_Pin|LED_Pin
                           |EN0_Pin|EN1_Pin|EN2_Pin|EN3_Pin
-                          |ENM2_Pin|ENM3_Pin|ENM4_Pin|ENM5_Pin
-                          |ENM6_Pin|ENM7_Pin;
+                          |COL2_Pin|COL3_Pin|COL4_Pin|COL5_Pin
+                          |COL6_Pin|COL7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;

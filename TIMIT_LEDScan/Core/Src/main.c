@@ -50,16 +50,28 @@ const uint8_t MAX_LED = 4;
 uint8_t led_buffer[4] = {1, 2, 3, 4};
 uint8_t hour = 15, minute = 8, second = 50;
 
+//uint8_t charA[8] =
+//{
+//		0b00011000,
+//		0b00111100,
+//		0b00100100,
+//		0b01100110,
+//		0b01111110,
+//		0b01100110,
+//		0b01100110,
+//		0b01100110
+//};
+
 uint8_t charA[8] =
 {
-		0b00011000,
-		0b00111100,
-		0b00100100,
-		0b01100110,
-		0b01111110,
-		0b01100110,
-		0b01100110,
-		0b01100110
+		0b01111100,
+		0b00010010,
+		0b00010001,
+		0b00010010,
+		0b01111100,
+		0b00000000,
+		0b00000000,
+		0b00000000
 };
 /* USER CODE END PV */
 
@@ -107,10 +119,12 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   software_timer_init();
-  uint8_t intr0 = setTimer(0, 0);
-  uint8_t intr1 = setTimer(0, 10);
-  uint8_t intr2 = setTimer(500, 500);
-  uint8_t index_led = 0;
+  uint8_t intr0 = setTimer(0, 0); 		/* timer for update real-time */
+  uint8_t intr1 = setTimer(0, 0); 		/* timer for 4-led digital clock scanning frequency */
+  uint8_t intr2 = setTimer(0, 10); 		/* timer for scanning speed, used for display LED matrix */
+  uint8_t intr3 = setTimer(1000, 1000); 		/* timer for animations, define how fast is the transition */
+  uint8_t intr4 = setTimer(8000, 1000);
+  int8_t row_led = matrix_row - 1;
   init_frame(charA);
   /* USER CODE END 2 */
 
@@ -127,8 +141,8 @@ int main(void)
 		  if (flag == intr0)
 		  {
 			  clear_flag();
-			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-			  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+			  //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+			  //HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 
 			  second++;
 			  if (second >= 60)
@@ -150,15 +164,22 @@ int main(void)
 		  }
 		  if (flag == intr1)
 		  {
-			  clear_flag();
-			  updateLEDMatrix(index_led);
-			  index_led = (index_led + 1) & 7;
-			  break;
+			  //update7SEG(index_led);
+
 		  }
 		  if (flag == intr2)
 		  {
 			  clear_flag();
-			  shift_left(0);
+			  updateLEDMatrix(row_led);
+			  row_led = row_led - 1;
+			  if (row_led < 0)
+				  row_led = matrix_row - 1;
+			  break;
+		  }
+		  if (flag == intr3)
+		  {
+			  clear_flag();
+			  shift_up(1);
 			  break;
 		  }
 	  }
