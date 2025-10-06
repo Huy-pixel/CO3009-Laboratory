@@ -37,9 +37,9 @@ timer_t* timer_construct(uint16_t delay, uint16_t period);
 void timer_destruct(timer_t* timer);
 void timer_add_to_list(timer_t* timer, timer_t* *head);
 timer_t* timer_delete_head(timer_t* *head);
-void timer_raise_flag(timer_t* timer_head);
+void timer_raise_flag(timer_t* timer);
 void timer_memory_pool_init(void);
-void timer_run(void);
+void timer_run(timer_t* timer);
 /* Private implementation ----------------------------------------------------*/
 
 /*
@@ -99,7 +99,7 @@ void timer_add_to_list(timer_t* timer, timer_t* *head)
 	}
 
 	/* while break means current is NULL also means it is the last one
-	 * or timer is at right place also means it is right before the current */
+	 * or timer is at right place */
 	if (*current != NULL)
 	{
 		(*current)->countdown -= timer->countdown;
@@ -125,9 +125,9 @@ timer_t* timer_delete_head(timer_t* *head)
 /*
  * Set the global flag by id of the timer expires
  */
-void timer_raise_flag(timer_t* timer_head)
+void timer_raise_flag(timer_t* timer)
 {
-	flag = timer_head->id;
+	flag = timer->id;
 }
 
 /*
@@ -148,15 +148,15 @@ void timer_memory_pool_init(void)
  * @param	None
  * @retval	None
  */
-void timer_run(void)
+void timer_run(timer_t* timer)
 {
-	if (!timer_head) return;	/* No timer is used */
+	if (!timer) return;	/* NULL pointer */
 
-	if (timer_head->countdown > 0)
+	if (timer->countdown > 0)
 	{
-		timer_head->countdown--;
-		if (timer_head->countdown <= 0)
-			timer_raise_flag(timer_head);
+		timer->countdown--;
+		if (timer->countdown == 0)
+			timer_raise_flag(timer);
 	}
 }
 /* Software-timer API --------------------------------------------------------*/
@@ -174,7 +174,7 @@ void software_timer_init(void)
 
 /**
  * @brief	Set up new timer with delay and period
- * @param	delay:  time before timer goes off when this API calls
+ * @param	delay:  time before timer goes off when this API called
  * 			period: time between a single time the timer goes off after the first expiration
  * @note	through the combined use of delay and period, user can set up either PERIODIC or ONESHOT timer
  * 			e.g: a ONESHOT timer has period value equals zero, whereas PERIODIC does not.
@@ -220,7 +220,7 @@ void clear_flag(void)
 	}
 
 	/* Re-check the following whether it expires */
-	if (timer_head->countdown <= 0)
+	if (timer_head->countdown == 0)
 		timer_raise_flag(timer_head);
 }
 
@@ -240,5 +240,5 @@ uint8_t get_flag(void)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-	timer_run();
+	timer_run(timer_head);
 }

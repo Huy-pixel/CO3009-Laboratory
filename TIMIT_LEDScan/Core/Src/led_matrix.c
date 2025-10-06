@@ -75,7 +75,7 @@ static uint32_t word_32_name[matrix_row] =
 #endif
 
 uint8_t frame[matrix_row];
-static uint8_t bitmask;
+static uint8_t buffer;
 /* Private implementation ----------------------------------------------------*/
 
 /**
@@ -99,7 +99,7 @@ static void display_row(uint8_t row)
 {
 	HAL_GPIO_WritePin(row_port_array[row], row_pin_array[row], row_set); /* Active desire row */
 	for (int8_t i = matrix_col - 1; i >= 0; i--)
-		HAL_GPIO_WritePin(column_port_array[i], column_pin_array[i], (bitmask & (1 << i)) ? column_set : column_reset);
+		HAL_GPIO_WritePin(column_port_array[i], column_pin_array[i], (buffer & (1 << i)) ? column_set : column_reset);
 }
 
 /**
@@ -110,9 +110,9 @@ static void display_row(uint8_t row)
 static void update_buffer(uint8_t row)
 {
 #ifdef name_display
-	bitmask = (uint8_t)word_32_name[row] >> 24;
+	buffer = (uint8_t)word_32_name[row] >> 24;
 #else
-	bitmask = frame[row];
+	buffer = frame[row];
 #endif
 }
 
@@ -161,45 +161,12 @@ void init_frame(uint8_t* ref)
  * @param	row index
  * reval	None
  */
-void updateLEDMatrix(uint8_t index)
+void updateLEDMatrix(uint8_t row)
 {
 	clearLEDMatrix(); // all LEDs on led-matrix turn off
 
-	switch(index)
-	{
-	case 0:
-		update_buffer(0); // get a string to display in row 1
-		display_row(0);
-		break;
-	case 1:
-		update_buffer(1); // get a string to display in row 2
-		display_row(1);
-		break;
-	case 2:
-		update_buffer(2); // get a string to display in row 3
-		display_row(2);
-		break;
-	case 3:
-		update_buffer(3); // get a string to display in row 4
-		display_row(3);
-		break;
-	case 4:
-		update_buffer(4); // get a string to display in row 5
-		display_row(4);
-		break;
-	case 5:
-		update_buffer(5); // get a string to display in row 6
-		display_row(5);
-		break;
-	case 6:
-		update_buffer(6); // get a string to display in row 7
-		display_row(6);
-		break;
-	case 7:
-		update_buffer(7); // get a string to display in row 8
-		display_row(7);
-		break;
-	}
+	update_buffer(row);
+	display_row(row);
 }
 
 /**
@@ -238,6 +205,11 @@ void shift_up(uint8_t isUp)
 		frame[0] = last;
 	}
 }
+
+//void animation_machine(void)
+//{
+//	swich
+//}
 
 #ifdef display_name
 /**

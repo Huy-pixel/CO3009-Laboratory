@@ -123,7 +123,7 @@ int main(void)
   uint8_t intr1 = setTimer(0, 0); 		/* timer for 4-led digital clock scanning frequency */
   uint8_t intr2 = setTimer(0, 10); 		/* timer for scanning speed, used for display LED matrix */
   uint8_t intr3 = setTimer(1000, 1000); 		/* timer for animations, define how fast is the transition */
-  uint8_t intr4 = setTimer(8000, 1000);
+  //uint8_t intr4 = setTimer(9000, 9000);			/* timer for animation machine, the shifting direction will change every (8+1)s */
   int8_t row_led = matrix_row - 1;
   init_frame(charA);
   /* USER CODE END 2 */
@@ -165,7 +165,6 @@ int main(void)
 		  if (flag == intr1)
 		  {
 			  //update7SEG(index_led);
-
 		  }
 		  if (flag == intr2)
 		  {

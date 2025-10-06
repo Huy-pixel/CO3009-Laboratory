@@ -16,8 +16,8 @@
  * User of this module must read thoroughly and set these things up carefully-*/
 
 /*!!! MUST set this correctly represent to actual hardware */
-#define matrix_row 5
-#define matrix_col 7
+#define matrix_row 8
+#define matrix_col 8
 /* GPIO_TypeDef* <> user label column pins used for control LED matrix */
 #define COL0_port COL0_GPIO_Port
 #define COL1_port COL1_GPIO_Port
@@ -69,6 +69,7 @@ void init_frame(uint8_t* ref);
 void updateLEDMatrix(uint8_t index);
 void shift_left(uint8_t isLeft);
 void shift_up(uint8_t isUp);
+void animation_machine(void);
 #ifdef name_display
 void shift_left_32();
 #endif
