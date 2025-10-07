@@ -6,11 +6,11 @@
  *      Author: soaic
  */
 /* Private includes ----------------------------------------------------------*/
+#include "stdint.h"
+#include "main.h"
+
 #include "led7seg.h"
 
-/* Refer to hardware for compatible state */
-#define led_set 	0U
-#define led_reset	1U
 /* Private variables ----------------------------------------------------------*/
 
 /**
@@ -32,24 +32,24 @@ static const uint8_t seg_code[10] =
 
 static GPIO_TypeDef* port[7] =
 {
-		SEG0_GPIO_Port,
-		SEG1_GPIO_Port,
-		SEG2_GPIO_Port,
-		SEG3_GPIO_Port,
-		SEG4_GPIO_Port,
-		SEG5_GPIO_Port,
-		SEG6_GPIO_Port
+		SEG0_PORT,
+		SEG1_PORT,
+		SEG2_PORT,
+		SEG3_PORT,
+		SEG4_PORT,
+		SEG5_PORT,
+		SEG6_PORT
 };
 
 static uint16_t pin[7] =
 {
-		SEG0_Pin,
-		SEG1_Pin,
-		SEG2_Pin,
-		SEG3_Pin,
-		SEG4_Pin,
-		SEG5_Pin,
-		SEG6_Pin
+		SEG0_PIN,
+		SEG1_PIN,
+		SEG2_PIN,
+		SEG3_PIN,
+		SEG4_PIN,
+		SEG5_PIN,
+		SEG6_PIN
 };
 
 /**
@@ -67,10 +67,10 @@ static const uint8_t dmap[16] =
  * @param	None
  * @retval	None
  */
-void Led7seg_Init()
+void Led7seg_Init(void)
 {
-	for (uint8_t i = 0; i<7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], GPIO_PIN_SET);
+	for (uint8_t i = 0; i < 7; i++)
+		HAL_GPIO_WritePin(port[i], pin[i], LED7SEG_RESET);
 }
 
 /**
@@ -82,6 +82,6 @@ void display7SEG(uint8_t num)
 {
 	num = dmap[num & 0x0F];	//get 4-last bit in order to not exceeding [0;9]
 	uint8_t index = seg_code[num];
-	for (uint8_t i = 0; i<7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? led_set : led_reset));
+	for (uint8_t i = 0; i < 7; i++)
+		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? LED7SEG_SET : LED7SEG_RESET));
 }

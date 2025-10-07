@@ -14,50 +14,50 @@
 /* Private variables ---------------------------------------------------------*/
 static GPIO_TypeDef* column_port_array[8] =
 {
-		COL0_port,
-		COL1_port,
-		COL2_port,
-		COL3_port,
-		COL4_port,
-		COL5_port,
-		COL6_port,
-		COL7_port
+		COL0_PORT,
+		COL1_PORT,
+		COL2_PORT,
+		COL3_PORT,
+		COL4_PORT,
+		COL5_PORT,
+		COL6_PORT,
+		COL7_PORT
 };
 
 static GPIO_TypeDef* row_port_array[8] =
 {
-		ROW0_port,
-		ROW1_port,
-		ROW2_port,
-		ROW3_port,
-		ROW4_port,
-		ROW5_port,
-		ROW6_port,
-		ROW7_port
+		ROW0_PORT,
+		ROW1_PORT,
+		ROW2_PORT,
+		ROW3_PORT,
+		ROW4_PORT,
+		ROW5_PORT,
+		ROW6_PORT,
+		ROW7_PORT
 };
 
 static uint16_t column_pin_array[8] =
 {
-		COL0_pin,
-		COL1_pin,
-		COL2_pin,
-		COL3_pin,
-		COL4_pin,
-		COL5_pin,
-		COL6_pin,
-		COL7_pin
+		COL0_PIN,
+		COL1_PIN,
+		COL2_PIN,
+		COL3_PIN,
+		COL4_PIN,
+		COL5_PIN,
+		COL6_PIN,
+		COL7_PIN
 };
 
 static uint16_t row_pin_array[8] =
 {
-		ROW0_pin,
-		ROW1_pin,
-		ROW2_pin,
-		ROW3_pin,
-		ROW4_pin,
-		ROW5_pin,
-		ROW6_pin,
-		ROW7_pin
+		ROW0_PIN,
+		ROW1_PIN,
+		ROW2_PIN,
+		ROW3_PIN,
+		ROW4_PIN,
+		ROW5_PIN,
+		ROW6_PIN,
+		ROW7_PIN
 };
 
 #ifdef name_display
@@ -74,8 +74,8 @@ static uint32_t word_32_name[matrix_row] =
 };
 #endif
 
-uint8_t frame[matrix_row];
-static uint8_t buffer;
+uint8_t frame[LED_MATRIX_ROW];
+static uint8_t g_buf;
 /* Private implementation ----------------------------------------------------*/
 
 /**
@@ -86,8 +86,8 @@ static uint8_t buffer;
  */
 static void clearLEDMatrix()
 {
-	for (uint8_t i = 0; i < matrix_row; i++)
-		HAL_GPIO_WritePin(row_port_array[i], row_pin_array[i], row_reset);
+	for (uint8_t i = 0; i < LED_MATRIX_ROW; i++)
+		HAL_GPIO_WritePin(row_port_array[i], row_pin_array[i], LED_MATRIX_ROWRESET);
 }
 
 /**
@@ -97,9 +97,9 @@ static void clearLEDMatrix()
  */
 static void display_row(uint8_t row)
 {
-	HAL_GPIO_WritePin(row_port_array[row], row_pin_array[row], row_set); /* Active desire row */
-	for (int8_t i = matrix_col - 1; i >= 0; i--)
-		HAL_GPIO_WritePin(column_port_array[i], column_pin_array[i], (buffer & (1 << i)) ? column_set : column_reset);
+	HAL_GPIO_WritePin(row_port_array[row], row_pin_array[row], LED_MATRIX_ROWSET); /* Active desire row */
+	for (int8_t i = LED_MATRIX_COL - 1; i >= 0; i--)
+		HAL_GPIO_WritePin(column_port_array[i], column_pin_array[i], (g_buf & (1 << i)) ? LED_MATRIX_COLSET : LED_MATRIX_COLRESET);
 }
 
 /**
@@ -112,7 +112,7 @@ static void update_buffer(uint8_t row)
 #ifdef name_display
 	buffer = (uint8_t)word_32_name[row] >> 24;
 #else
-	buffer = frame[row];
+	g_buf = frame[row];
 #endif
 }
 
@@ -125,13 +125,13 @@ static uint8_t circular_shift_left(uint8_t num, uint8_t isLeft)
 {
 	if (isLeft)
 	{
-		uint8_t msb = num >> (matrix_col - 1);
+		uint8_t msb = num >> (LED_MATRIX_COL - 1);
 		return (num << 1) | msb;
 	}
 	else
 	{
 		uint8_t lsb = num & 1;
-		return (num >> 1) | (lsb << (matrix_col - 1));
+		return (num >> 1) | (lsb << (LED_MATRIX_COL - 1));
 	}
 }
 
@@ -152,7 +152,7 @@ static uint32_t circular_shift_left_32(uint32_t num)
 
 void init_frame(uint8_t* ref)
 {
-	for (uint8_t i=0; i < matrix_row; i++)
+	for (uint8_t i=0; i < LED_MATRIX_ROW; i++)
 		frame[i] = ref[i];
 }
 
@@ -178,12 +178,12 @@ void shift_left(uint8_t isLeft)
 {
 	if (isLeft)
 	{
-		for(uint8_t i = 0; i < matrix_row; i++)
+		for(uint8_t i = 0; i < LED_MATRIX_ROW; i++)
 				frame[i] = circular_shift_left(frame[i], isLeft);
 	}
 	else
 	{
-		for(uint8_t i = 0; i < matrix_row; i++)
+		for(uint8_t i = 0; i < LED_MATRIX_ROW; i++)
 				frame[i] = circular_shift_left(frame[i], isLeft);
 	}
 }
@@ -193,23 +193,18 @@ void shift_up(uint8_t isUp)
 	if (isUp)
 	{
 		uint8_t first = frame[0];
-		for (uint8_t i = 0; i < matrix_row - 1; i++)
+		for (uint8_t i = 0; i < LED_MATRIX_ROW - 1; i++)
 			frame[i] = frame[i+1];
-		frame[matrix_row - 1] = first;
+		frame[LED_MATRIX_ROW - 1] = first;
 	}
 	else
 	{
-		uint8_t last = frame[matrix_row - 1];
-		for (uint8_t i = matrix_row - 1; i > 0; i--)
+		uint8_t last = frame[LED_MATRIX_ROW - 1];
+		for (uint8_t i = LED_MATRIX_ROW - 1; i > 0; i--)
 			frame[i] = frame[i-1];
 		frame[0] = last;
 	}
 }
-
-//void animation_machine(void)
-//{
-//	swich
-//}
 
 #ifdef display_name
 /**

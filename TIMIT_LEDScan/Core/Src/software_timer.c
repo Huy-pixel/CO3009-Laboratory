@@ -6,12 +6,15 @@
  */
 
 /* Private includes ----------------------------------------------------------*/
+#include "main.h"
+#include "tim.h"
+#include "stdint.h"
+
+/* Header file ---------------------------------------------------------------*/
 #include "software_timer.h"
 
 /* Timer_type definition -----------------------------------------------------*/
-typedef struct timer_t timer_t;
-
-struct timer_t
+typedef struct software_timer
 {
 	uint8_t id; 						/* timer id: user can define up to 255 timers, 0 is preserved for flag */
 	volatile uint16_t countdown; 		/* timer's duration
@@ -21,15 +24,15 @@ struct timer_t
 	uint16_t period;					/* timer's period, used for reload countdown
 	 	 	 	 	 	 	 	 	 	 * a PERIODIC timer has this attribute none zero, whereas a ONESHOT does not
 	 	 	 	 	 	 	 	 	 	 */
-	timer_t* next; 						/* pointer to the next timer */
-};
+	struct software_timer* p_next;		/* pointer to the next timer */
+}timer_t;
 
 /* Software-timer components --------------------------------------------------*/
-static timer_t timer_pool[MAX_TIMER];	/* a software-timer pool with 10 timers available */
-static uint8_t timer_seedID = 1;		/* seed for generate timer's id , 0 is preserved for flag*/
-static timer_t* timer_head;				/* pointer to the active list */
-static timer_t* free_list;				/* pointer to the free list */
-static volatile uint8_t flag;			/* global flag of software timer */
+static timer_t timer_memory_pool[MAX_TIMER];	/* a software-timer pool with 10 timers available */
+static uint8_t g_seedID = 1;					/* seed for generate timer's id , 0 is preserved for flag*/
+static timer_t* p_active_list;					/* pointer to the head of active list */
+static timer_t* p_free_list;					/* pointer to the free list */
+static volatile uint8_t g_flag;					/* global flag of software timer */
 
 /* Singly linked list method-like functions forward declaration --------------*/
 static timer_t* timer_fetch_free_slot(void);
@@ -47,11 +50,11 @@ static void timer_run(timer_t* timer);
  */
 static timer_t* timer_fetch_free_slot(void)
 {
-	if (free_list == NULL) /* No more free slot */
+	if (!p_free_list) /* No more free slot */
 		return NULL;
-	timer_t* slot = free_list;
-	free_list = free_list->next;
-	slot->next = NULL;
+	timer_t* slot = p_free_list;
+	p_free_list = p_free_list->p_next;
+	slot->p_next = NULL;
 	return slot;
 }
 
@@ -61,13 +64,15 @@ static timer_t* timer_fetch_free_slot(void)
 static timer_t* timer_construct(uint16_t delay, uint16_t period)
 {
 	timer_t* timer = timer_fetch_free_slot();
-	if (timer == NULL) /* fetch free slot fail */
+	if (!timer)		/* fetch free slot fail */
+	{
 		return NULL;
+	}
 
-	timer->id = timer_seedID++;
+	timer->id = g_seedID++;
 	timer->countdown = delay;
 	timer->period = period;
-	timer->next = NULL;
+	timer->p_next = NULL;
 	return timer;
 }
 
@@ -77,9 +82,11 @@ static timer_t* timer_construct(uint16_t delay, uint16_t period)
 static void timer_destruct(timer_t* timer)
 {
 	if (!timer)
+	{
 		return;
-	timer->next = free_list;
-	free_list = timer;
+	}
+	timer->p_next = p_free_list;
+	p_free_list = timer;
 }
 
 /**
@@ -88,25 +95,28 @@ static void timer_destruct(timer_t* timer)
 static void timer_add_to_list(timer_t* timer, timer_t* *head)
 {
 	if (!timer || !head)
-		return;
-	timer->next = NULL;
-
-	timer_t* *current = head;
-	while (*current != NULL && timer->countdown >= (*current)->countdown) /* the equals here is important */
 	{
-		timer->countdown -= (*current)->countdown;
-		current = &(*current)->next;
+		return;
+	}
+
+	timer->p_next = NULL;
+
+	timer_t* *curr = head;
+	while ( (*curr != NULL) && (timer->countdown >= (*curr)->countdown) ) /* the equals here is important */
+	{
+		timer->countdown -= (*curr)->countdown;
+		curr = &(*curr)->p_next;
 	}
 
 	/* while break means current is NULL also means it is the last one
 	 * or timer is at right place */
-	if (*current != NULL)
+	if (*curr != NULL)
 	{
-		(*current)->countdown -= timer->countdown;
+		(*curr)->countdown -= timer->countdown;
 	}
 
-	timer->next = *current;
-	*current = timer;
+	timer->p_next = *curr;
+	*curr = timer;
 }
 
 /*
@@ -115,10 +125,13 @@ static void timer_add_to_list(timer_t* timer, timer_t* *head)
 static timer_t* timer_delete_head(timer_t* *head)
 {
 	if (!head || !(*head))
+	{
 		return NULL;
+	}
+
 	timer_t* victim = *head;
-	*head = (*head)->next;
-	victim->next = NULL;
+	*head = (*head)->p_next;
+	victim->p_next = NULL;
 	return victim;
 }
 
@@ -127,7 +140,7 @@ static timer_t* timer_delete_head(timer_t* *head)
  */
 static void timer_raise_flag(timer_t* timer)
 {
-	flag = timer->id;
+	g_flag = timer->id;
 }
 
 /*
@@ -137,10 +150,10 @@ static void timer_memory_pool_init(void)
 {
 	for (int i = 0; i < MAX_TIMER - 1; i++)
 	{
-		timer_pool[i].next = &timer_pool[i + 1];
+		timer_memory_pool[i].p_next = &timer_memory_pool[i + 1];
 	}
-	timer_pool[MAX_TIMER - 1].next = NULL;
-	free_list = &timer_pool[0];
+	timer_memory_pool[MAX_TIMER - 1].p_next = NULL;
+	p_free_list = &timer_memory_pool[0];
 }
 
 /**
@@ -150,13 +163,19 @@ static void timer_memory_pool_init(void)
  */
 static void timer_run(timer_t* timer)
 {
-	if (!timer) return;	/* NULL pointer */
+	if (!timer)			/* No timer is used */
+	{
+		return;
+	}
 
 	if (timer->countdown > 0)
 	{
 		timer->countdown--;
 		if (timer->countdown == 0)
+		{
 			timer_raise_flag(timer);
+		}
+
 	}
 }
 /* Software-timer API --------------------------------------------------------*/
@@ -183,15 +202,22 @@ void software_timer_init(void)
 uint8_t setTimer(uint16_t delay, uint16_t period)
 {
 	if (!delay && !period)				/* user define a null timer */
+	{
 		return 0;
+	}
+
 	if (!delay)
+	{
 		delay += TIMER_CYCLE; 			/* 0 in users perspective means no delay, but for timer_run() logic, no delay must be value as 1 */
+	}
 
 	timer_t* instance = timer_construct(delay/TIMER_CYCLE, period/TIMER_CYCLE);
 	if (!instance)
+	{
 		return 0;
+	}
 
-	timer_add_to_list(instance, &timer_head);
+	timer_add_to_list(instance, &p_active_list);
 	return instance->id;
 }
 
@@ -205,14 +231,14 @@ uint8_t setTimer(uint16_t delay, uint16_t period)
  */
 void clear_flag(void)
 {
-	flag = 0;
+	g_flag = 0;
 
-	timer_t* expire = timer_delete_head(&timer_head);
+	timer_t* expire = timer_delete_head(&p_active_list);
 
 	if (expire->period)
 	{
 		expire->countdown = expire->period;			/* reload PERIODIC timer's countdown */
-		timer_add_to_list(expire, &timer_head);		/* move to its place */
+		timer_add_to_list(expire, &p_active_list);		/* move to its place */
 	}
 	else
 	{
@@ -220,8 +246,8 @@ void clear_flag(void)
 	}
 
 	/* Re-check the following whether it expires */
-	if (timer_head->countdown == 0)
-		timer_raise_flag(timer_head);
+	if (p_active_list->countdown == 0)
+		timer_raise_flag(p_active_list);
 }
 
 /**
@@ -231,7 +257,7 @@ void clear_flag(void)
  */
 uint8_t get_flag(void)
 {
-	return flag;
+	return g_flag;
 }
 
 /*
@@ -240,5 +266,5 @@ uint8_t get_flag(void)
  */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
-	timer_run(timer_head);
+	timer_run(p_active_list);
 }

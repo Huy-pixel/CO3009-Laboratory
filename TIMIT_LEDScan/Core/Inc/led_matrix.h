@@ -16,49 +16,49 @@
  * User of this module must read thoroughly and set these things up carefully-*/
 
 /*!!! MUST set this correctly represent to actual hardware */
-#define matrix_row 8
-#define matrix_col 8
+#define LED_MATRIX_ROW 8
+#define LED_MATRIX_COL 8
 /* GPIO_TypeDef* <> user label column pins used for control LED matrix */
-#define COL0_port COL0_GPIO_Port
-#define COL1_port COL1_GPIO_Port
-#define COL2_port COL2_GPIO_Port
-#define COL3_port COL3_GPIO_Port
-#define COL4_port COL4_GPIO_Port
-#define COL5_port COL5_GPIO_Port	/* If not use, set this to 0 */
-#define COL6_port COL6_GPIO_Port	/* If not use, set this to 0 */
-#define COL7_port COL7_GPIO_Port	/* If not use, set this to 0 */
+#define COL0_PORT COL0_GPIO_Port
+#define COL1_PORT COL1_GPIO_Port
+#define COL2_PORT COL2_GPIO_Port
+#define COL3_PORT COL3_GPIO_Port
+#define COL4_PORT COL4_GPIO_Port
+#define COL5_PORT COL5_GPIO_Port	/* If not use, set this to 0 */
+#define COL6_PORT COL6_GPIO_Port	/* If not use, set this to 0 */
+#define COL7_PORT COL7_GPIO_Port	/* If not use, set this to 0 */
 /* GPIO_TypeDef* <> user label row pins used for control LED matrix*/
-#define ROW0_port ROW0_GPIO_Port
-#define ROW1_port ROW1_GPIO_Port
-#define ROW2_port ROW2_GPIO_Port
-#define ROW3_port ROW3_GPIO_Port
-#define ROW4_port ROW4_GPIO_Port
-#define ROW5_port ROW5_GPIO_Port
-#define ROW6_port ROW6_GPIO_Port
-#define ROW7_port ROW7_GPIO_Port	/* If not use, set this to 0 */
+#define ROW0_PORT ROW0_GPIO_Port
+#define ROW1_PORT ROW1_GPIO_Port
+#define ROW2_PORT ROW2_GPIO_Port
+#define ROW3_PORT ROW3_GPIO_Port
+#define ROW4_PORT ROW4_GPIO_Port
+#define ROW5_PORT ROW5_GPIO_Port
+#define ROW6_PORT ROW6_GPIO_Port
+#define ROW7_PORT ROW7_GPIO_Port	/* If not use, set this to 0 */
 /* uint16_t <> user label column pins used for control LED matrix */
-#define COL0_pin COL0_Pin
-#define COL1_pin COL1_Pin
-#define COL2_pin COL2_Pin
-#define COL3_pin COL3_Pin
-#define COL4_pin COL4_Pin
-#define COL5_pin COL5_Pin 			/* If not use, set this to 0 */
-#define COL6_pin COL6_Pin			/* If not use, set this to 0 */
-#define COL7_pin COL7_Pin			/* If not use, set this to 0 */
+#define COL0_PIN COL0_Pin
+#define COL1_PIN COL1_Pin
+#define COL2_PIN COL2_Pin
+#define COL3_PIN COL3_Pin
+#define COL4_PIN COL4_Pin
+#define COL5_PIN COL5_Pin 			/* If not use, set this to 0 */
+#define COL6_PIN COL6_Pin			/* If not use, set this to 0 */
+#define COL7_PIN COL7_Pin			/* If not use, set this to 0 */
 /* uint16_t <> user label column pins used for control LED matrix */
-#define ROW0_pin ROW0_Pin
-#define ROW1_pin ROW1_Pin
-#define ROW2_pin ROW2_Pin
-#define ROW3_pin ROW3_Pin
-#define ROW4_pin ROW4_Pin
-#define ROW5_pin ROW5_Pin
-#define ROW6_pin ROW6_Pin
-#define ROW7_pin ROW7_Pin			/* If not use, set this to 0 */
+#define ROW0_PIN ROW0_Pin
+#define ROW1_PIN ROW1_Pin
+#define ROW2_PIN ROW2_Pin
+#define ROW3_PIN ROW3_Pin
+#define ROW4_PIN ROW4_Pin
+#define ROW5_PIN ROW5_Pin
+#define ROW6_PIN ROW6_Pin
+#define ROW7_PIN ROW7_Pin			/* If not use, set this to 0 */
 /* Refer to hardware design on LED Matrix for compatible active/deactive state*/
-#define row_set			1U
-#define row_reset		0U
-#define column_set		1U
-#define column_reset	0U
+#define LED_MATRIX_ROWSET		1U
+#define LED_MATRIX_ROWRESET		0U
+#define LED_MATRIX_COLSET		1U
+#define LED_MATRIX_COLRESET		0U
 
 //#define name_display
 /* Exported Variables --------------------------------------------------------*/
@@ -69,7 +69,6 @@ void init_frame(uint8_t* ref);
 void updateLEDMatrix(uint8_t index);
 void shift_left(uint8_t isLeft);
 void shift_up(uint8_t isUp);
-void animation_machine(void);
 #ifdef name_display
 void shift_left_32();
 #endif
