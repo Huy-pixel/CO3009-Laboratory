@@ -13,15 +13,15 @@ typedef struct timer_t timer_t;
 
 struct timer_t
 {
-	uint8_t id; 				/* timer id: user can define up to 255 timers, 0 is preserved for flag */
-	uint16_t countdown; 		/* timer's duration
-							 	 * if using unsigned integer 16 bit, countdown can range from 0->65536 (2^16)
-							 	 * if using signed	 integer 16 bit, countdown can range from -32768->32768 (2^15, 1 bit for sign)
-							 	 */
-	uint16_t period;			/* timer's period, used for reload countdown
-	 	 	 	 	 	 	 	 * a PERIODIC timer has this attribute none zero, whereas a ONESHOT does not
-	 	 	 	 	 	 	 	 */
-	timer_t* next; 				/* pointer to the next timer */
+	uint8_t id; 						/* timer id: user can define up to 255 timers, 0 is preserved for flag */
+	uint16_t volatile countdown; 		/* timer's duration
+							 	 	 	 * if using unsigned integer 16 bit, countdown can range from 0->65536 (2^16)
+							 	 	 	 * if using signed	 integer 16 bit, countdown can range from -32768->32768 (2^15, 1 bit for sign)
+							 	 	 	 */
+	uint16_t period;					/* timer's period, used for reload countdown
+	 	 	 	 	 	 	 	 	 	 * a PERIODIC timer has this attribute none zero, whereas a ONESHOT does not
+	 	 	 	 	 	 	 	 	 	 */
+	timer_t* next; 						/* pointer to the next timer */
 };
 
 /* Software-timer components --------------------------------------------------*/
@@ -29,7 +29,7 @@ static timer_t timer_pool[MAX_TIMER];	/* a software-timer pool with 10 timers av
 static uint8_t timer_seedID = 1;		/* seed for generate timer's id , 0 is preserved for flag*/
 static timer_t* timer_head;				/* pointer to the active list */
 static timer_t* free_list;				/* pointer to the free list */
-static uint8_t flag;					/* global flag of software timer */
+static uint8_t volatile flag;			/* global flag of software timer */
 
 /* Singly linked list method-like functions forward declaration --------------*/
 timer_t* timer_fetch_free_slot(void);
