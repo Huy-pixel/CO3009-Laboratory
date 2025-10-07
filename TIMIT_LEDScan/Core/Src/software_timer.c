@@ -14,7 +14,7 @@ typedef struct timer_t timer_t;
 struct timer_t
 {
 	uint8_t id; 						/* timer id: user can define up to 255 timers, 0 is preserved for flag */
-	uint16_t volatile countdown; 		/* timer's duration
+	volatile uint16_t countdown; 		/* timer's duration
 							 	 	 	 * if using unsigned integer 16 bit, countdown can range from 0->65536 (2^16)
 							 	 	 	 * if using signed	 integer 16 bit, countdown can range from -32768->32768 (2^15, 1 bit for sign)
 							 	 	 	 */
@@ -29,23 +29,23 @@ static timer_t timer_pool[MAX_TIMER];	/* a software-timer pool with 10 timers av
 static uint8_t timer_seedID = 1;		/* seed for generate timer's id , 0 is preserved for flag*/
 static timer_t* timer_head;				/* pointer to the active list */
 static timer_t* free_list;				/* pointer to the free list */
-static uint8_t volatile flag;			/* global flag of software timer */
+static volatile uint8_t flag;			/* global flag of software timer */
 
 /* Singly linked list method-like functions forward declaration --------------*/
-timer_t* timer_fetch_free_slot(void);
-timer_t* timer_construct(uint16_t delay, uint16_t period);
-void timer_destruct(timer_t* timer);
-void timer_add_to_list(timer_t* timer, timer_t* *head);
-timer_t* timer_delete_head(timer_t* *head);
-void timer_raise_flag(timer_t* timer);
-void timer_memory_pool_init(void);
-void timer_run(timer_t* timer);
+static timer_t* timer_fetch_free_slot(void);
+static timer_t* timer_construct(uint16_t delay, uint16_t period);
+static void timer_destruct(timer_t* timer);
+static void timer_add_to_list(timer_t* timer, timer_t* *head);
+static timer_t* timer_delete_head(timer_t* *head);
+static void timer_raise_flag(timer_t* timer);
+static void timer_memory_pool_init(void);
+static void timer_run(timer_t* timer);
 /* Private implementation ----------------------------------------------------*/
 
 /*
  * This procedure fetch for free slot in free list, lead by pointer free_list
  */
-timer_t* timer_fetch_free_slot(void)
+static timer_t* timer_fetch_free_slot(void)
 {
 	if (free_list == NULL) /* No more free slot */
 		return NULL;
@@ -58,7 +58,7 @@ timer_t* timer_fetch_free_slot(void)
 /**
  * timer_t object constructor
  */
-timer_t* timer_construct(uint16_t delay, uint16_t period)
+static timer_t* timer_construct(uint16_t delay, uint16_t period)
 {
 	timer_t* timer = timer_fetch_free_slot();
 	if (timer == NULL) /* fetch free slot fail */
@@ -74,7 +74,7 @@ timer_t* timer_construct(uint16_t delay, uint16_t period)
 /**
  * timer_t object destructor
  */
-void timer_destruct(timer_t* timer)
+static void timer_destruct(timer_t* timer)
 {
 	if (!timer)
 		return;
@@ -85,7 +85,7 @@ void timer_destruct(timer_t* timer)
 /**
  * Add a new timer into active list, lead by pointer timer_head
  */
-void timer_add_to_list(timer_t* timer, timer_t* *head)
+static void timer_add_to_list(timer_t* timer, timer_t* *head)
 {
 	if (!timer || !head)
 		return;
@@ -112,7 +112,7 @@ void timer_add_to_list(timer_t* timer, timer_t* *head)
 /*
  * Delete head of active list, because it's always the head expires
  */
-timer_t* timer_delete_head(timer_t* *head)
+static timer_t* timer_delete_head(timer_t* *head)
 {
 	if (!head || !(*head))
 		return NULL;
@@ -125,7 +125,7 @@ timer_t* timer_delete_head(timer_t* *head)
 /*
  * Set the global flag by id of the timer expires
  */
-void timer_raise_flag(timer_t* timer)
+static void timer_raise_flag(timer_t* timer)
 {
 	flag = timer->id;
 }
@@ -133,7 +133,7 @@ void timer_raise_flag(timer_t* timer)
 /*
  * Setup timer_t memory pool
  */
-void timer_memory_pool_init(void)
+static void timer_memory_pool_init(void)
 {
 	for (int i = 0; i < MAX_TIMER - 1; i++)
 	{
@@ -148,7 +148,7 @@ void timer_memory_pool_init(void)
  * @param	None
  * @retval	None
  */
-void timer_run(timer_t* timer)
+static void timer_run(timer_t* timer)
 {
 	if (!timer) return;	/* NULL pointer */
 
