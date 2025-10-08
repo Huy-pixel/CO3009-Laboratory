@@ -120,7 +120,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   software_timer_init();
   uint8_t intr0 = setTimer(0, 1000); 		/* timer for update real-time */
-  uint8_t intr1 = setTimer(0, 1000); 		/* timer for 4-led digital clock scanning frequency */
+  uint8_t intr1 = setTimer(0, 250); 		/* timer for 4-led digital clock scanning frequency */
   uint8_t intr2 = setTimer(0, 0); 		/* timer for scanning speed, used for display LED matrix */
   uint8_t intr3 = setTimer(0, 0); 		/* timer for animations, define how fast is the transition */
   int8_t row_led = LED_MATRIX_ROW - 1;
@@ -142,8 +142,8 @@ int main(void)
 	  		  if (flag == intr0)
 	  		  {
 	  			  clear_flag();
-	  			  //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  			  //HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+	  			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  			  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 
 	  			  second++;
 	  			  if (second >= 60)
@@ -188,6 +188,7 @@ int main(void)
 	  		  {
 	  			  clear_flag();
 	  			  shift_left(1);
+	  			  shift_up(1);
 	  			  break;
 	  		  }
 	  }
