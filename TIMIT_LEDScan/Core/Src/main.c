@@ -120,21 +120,20 @@ int main(void)
   /* USER CODE BEGIN 2 */
   software_timer_init();
   uint8_t intr0 = setTimer(0, 1000); 		/* timer for update real-time */
-  uint8_t intr1 = setTimer(0, 0); 		/* timer for 4-led digital clock scanning frequency */
+  uint8_t intr1 = setTimer(0, 1000); 		/* timer for 4-led digital clock scanning frequency */
   uint8_t intr2 = setTimer(0, 0); 		/* timer for scanning speed, used for display LED matrix */
   uint8_t intr3 = setTimer(0, 0); 		/* timer for animations, define how fast is the transition */
-  //uint8_t intr4 = setTimer(0, 0);			/* timer for animation machine, the shifting direction will change every (8+1)s */
   int8_t row_led = LED_MATRIX_ROW - 1;
-  uint8_t led_index = 3;
-  //init_frame(charA);
-
+  int8_t led_index = 3;
+  init_frame(charA);
+  uint8_t flag = 0;
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  uint8_t flag = get_flag();
+	  flag = get_flag();
 	  switch(flag)
 	  {
 	  	  case 0:	/* no interrupt at this time */
@@ -143,8 +142,8 @@ int main(void)
 	  		  if (flag == intr0)
 	  		  {
 	  			  clear_flag();
-	  			  HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
-	  			  HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
+	  			  //HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
+	  			  //HAL_GPIO_TogglePin(DOT_GPIO_Port, DOT_Pin);
 
 	  			  second++;
 	  			  if (second >= 60)
@@ -167,7 +166,11 @@ int main(void)
 	  		  if (flag == intr1)
 	  		  {
 	  			  update7SEG(led_index);
-	  			  //led_index = (led_index + 1) & 4;
+	  			  led_index = (led_index - 1);
+	  			  if (led_index < 0)
+	  			  {
+	  				  led_index = 3;
+	  			  }
 	  			  break;
 	  		  }
 	  		  if (flag == intr2)
@@ -184,7 +187,7 @@ int main(void)
 	  		  if (flag == intr3)
 	  		  {
 	  			  clear_flag();
-	  			  shift_up(1);
+	  			  shift_left(1);
 	  			  break;
 	  		  }
 	  }

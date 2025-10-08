@@ -58,7 +58,7 @@ static uint16_t pin[7] =
 static const uint8_t dmap[16] =
 {
 		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	// 0-9
-		0, 1, 2, 3, 4, 5				// 10-15
+		0, 0, 0, 0, 0, 0				// 10-15
 };
 /* Private code --------------------------------------------------------------*/
 
@@ -80,8 +80,110 @@ void Led7seg_Init(void)
  */
 void display7SEG(uint8_t num)
 {
-	num = dmap[num & 0x0F];	//get 4-last bit in order to not exceeding [0;9]
+	//num = dmap[num & 0x0F];	//get 4-last bit in order to not exceeding [0;9]
 	uint8_t index = seg_code[num];
-	for (uint8_t i = 0; i < 7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? LED7SEG_SET : LED7SEG_RESET));
+//	for (uint8_t i = 0; i < 7; i++)
+//		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? LED7SEG_SET : LED7SEG_RESET));
+	switch(num)
+	{
+	case 0:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_RESET);
+	break;
+	case 1:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_RESET);
+	break;
+	case 2:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	case 3:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	case 4:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	case 5:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	case 6:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	case 7:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_RESET);
+	break;
+	case 8:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	case 9:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_SET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_SET);
+	break;
+	default:
+		HAL_GPIO_WritePin(port[0], pin[0], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[1], pin[1], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[2], pin[2], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[3], pin[3], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[4], pin[4], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[5], pin[5], LED7SEG_RESET);
+		HAL_GPIO_WritePin(port[6], pin[6], LED7SEG_RESET);
+	break;
+	}
 }
