@@ -122,7 +122,7 @@ int main(void)
   uint8_t intr0 = setTimer(0, 0); 		/* timer for update real-time */
   uint8_t intr1 = setTimer(0, 0); 		/* timer for 4-led digital clock scanning frequency */
   uint8_t intr2 = setTimer(0, 10); 		/* timer for scanning speed, used for display LED matrix */
-  uint8_t intr3 = setTimer(0, 1000); 		/* timer for animations, define how fast is the transition */
+  uint8_t intr3 = setTimer(1000, 1000); 		/* timer for animations, define how fast is the transition */
   int8_t row_led = LED_MATRIX_ROW - 1;
   int8_t led_index = 3;
   init_frame(charA);
