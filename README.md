@@ -1,2 +1,2 @@
-# A VDK-VXL-laboratory
-A default branch (a newly created project, nothing done)
+# LAB2: TIMER INTERRUPT AND LED SCANNING
+Complete
