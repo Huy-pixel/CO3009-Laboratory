@@ -44,23 +44,36 @@ void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, outp0_Pin|outp1_Pin|outp2_Pin|outp3_Pin
-                          |outp4_Pin|outp5_Pin|outp6_Pin|outp7_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin
+                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : outp0_Pin outp1_Pin outp2_Pin outp3_Pin
-                           outp4_Pin outp5_Pin outp6_Pin outp7_Pin */
-  GPIO_InitStruct.Pin = outp0_Pin|outp1_Pin|outp2_Pin|outp3_Pin
-                          |outp4_Pin|outp5_Pin|outp6_Pin|outp7_Pin;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, RED_x_Pin|GREEN_x_Pin|YELLOW_x_Pin|RED_y_Pin
+                          |GREEN_y_Pin|YELLOW_y_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pins : SEG0_Pin SEG1_Pin SEG2_Pin SEG3_Pin
+                           SEG4_Pin SEG5_Pin SEG6_Pin SEG7_Pin */
+  GPIO_InitStruct.Pin = SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin
+                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : button_Pin */
-  GPIO_InitStruct.Pin = button_Pin;
+  /*Configure GPIO pins : BUTTON_0_Pin BUTTON_1_Pin BUTTON_2_Pin */
+  GPIO_InitStruct.Pin = BUTTON_0_Pin|BUTTON_1_Pin|BUTTON_2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(button_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : RED_x_Pin GREEN_x_Pin YELLOW_x_Pin RED_y_Pin
+                           GREEN_y_Pin YELLOW_y_Pin */
+  GPIO_InitStruct.Pin = RED_x_Pin|GREEN_x_Pin|YELLOW_x_Pin|RED_y_Pin
+                          |GREEN_y_Pin|YELLOW_y_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
