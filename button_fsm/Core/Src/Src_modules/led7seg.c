@@ -16,7 +16,7 @@
 /**
  * @Note	An array for looking up bit-mask used to display 7-segments LED
  */
-static const uint8_t seg_code[10] =
+static const uint8_t seg_code[11] =
 {
 		0x3f, // 0
 		0x06, // 1
@@ -28,6 +28,7 @@ static const uint8_t seg_code[10] =
 		0x07, // 7
 		0x7F, // 8
 		0x6F, // 9
+		0x79  // E: error, exceeding 9
 };
 
 static GPIO_TypeDef* port[7] =
@@ -52,14 +53,6 @@ static uint16_t pin[7] =
 		SEG6_PIN
 };
 
-/**
- * @Note	A lookup table ensures number not exceed limits
- */
-static const uint8_t dmap[16] =
-{
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9,	// 0-9
-		0, 0, 0, 0, 0, 0				// 10-15
-};
 /* Private code --------------------------------------------------------------*/
 
 /**
@@ -78,12 +71,49 @@ void Led7seg_Init(void)
  * @param	A number to display
  * @retval 	None
  */
-void display7SEG(uint8_t num)
+void display_single_7SEG(uint8_t num)
 {
-	num = dmap[num & 0x0F];	//get 4-last bit in order to not exceeding [0;9]
-	uint8_t index = seg_code[num];
+	uint8_t index = seg_code[(num > 9) ? 10 : num];
 	for (uint8_t i = 0; i < 7; i++)
 	{
 		HAL_GPIO_WritePin(port[i], pin[i], ((index & (1 << i)) ? LED7SEG_SET : LED7SEG_RESET));
 	}
 }
+
+/**
+ * @brief	Display a pair of 7-segment LED, using scanning method, scan frequency depends on TIMER_CYCLE
+ * @param	A number to display, references to ENABLE pin, 2 ENABLE pin requires
+ * @retval 	None
+ */
+void display_pair_7SEG(uint8_t num, GPIO_TypeDef* en0_port, uint16_t en0_pin, GPIO_TypeDef* en1_port, uint16_t en1_pin)
+{
+	static uint8_t intr = 0;
+	static uint8_t state = 0;
+
+	if (!intr)
+	{
+		intr = setTimer(0, 10);
+	}
+
+	uint8_t flag = get_flag();
+	if (flag == intr)
+	{
+		clear_flag();
+		state = !state;
+		switch(state)
+		{
+		case 0:
+			HAL_GPIO_WritePin(en0_port, en0_pin, EN_SET);
+			HAL_GPIO_WritePin(en1_port, en1_pin, EN_RST);
+			display_single_7SEG(num/10);
+		break;
+		case 1:
+			HAL_GPIO_WritePin(en0_port, en0_pin, EN_RST);
+			HAL_GPIO_WritePin(en1_port, en1_pin, EN_SET);
+			display_single_7SEG(num%10);
+		break;
+		}
+	}
+}
+
+void display_2pairs_7SEG();

@@ -9,6 +9,8 @@
 #ifndef INC_LED7SEG_H_
 #define INC_LED7SEG_H_
 
+#include "software_timer.h"
+
 /**
  * Configuration for LED 7 segment set, reset logic level
  * The default configuration is compatible for common usage of LED 7 segment
@@ -22,6 +24,9 @@
 #	define LED7SEG_SET		1U
 #	define LED7SEG_RESET	0U
 #endif
+
+#define EN_SET				0U
+#define EN_RST				1U
 
 #define SEG0_PORT SEG0_GPIO_Port
 #define SEG1_PORT SEG1_GPIO_Port
@@ -39,8 +44,9 @@
 #define SEG5_PIN SEG5_Pin
 #define SEG6_PIN SEG6_Pin
 
+
 /* Function prototypes -------------------------------------------------------*/
 void Led7seg_Init(void);
 void display7SEG(uint8_t num);
-
+void display_pair_7SEG(uint8_t num, GPIO_TypeDef* en0_port, uint16_t en0_pin, GPIO_TypeDef* en1_port, uint16_t en1_pin);
 #endif /* INC_LED7SEG_H_ */

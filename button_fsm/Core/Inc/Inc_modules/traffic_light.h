@@ -10,29 +10,35 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include "software_timer.h"
 /* Define --------------------------------------------------------------------*/
 //Define LED value for bit-mask usage
-#ifndef TRAFFIC_LIGHT_HARDWARE_MODULE
-#	define xRED 		((uint8_t) 1 << 0)
-#	define xGREEN 		((uint8_t) 1 << 1)
-#	define xYELLOW 		((uint8_t) 1 << 2)
-#	define yRED 		((uint8_t) 1 << 3)
-#	define yGREEN		((uint8_t) 1 << 4)
-#	define yYELLOW 		((uint8_t) 1 << 5)
-#else
-#	define xRED			((uint8_t) 0x0001)
-#	define xAMBER		((uint8_t) 0x0002)
-#	define xGREEN		((uint8_t) 0x0003)
-#	define yRED			((uint8_t) 0x0100)
-#	define yAMBER		((uint8_t) 0x0200)
-#	define yGREEN		((uint8_t) 0x0300)
-#endif
+
 #define LIGHT_SET	0U
 #define LIGHT_RESET	1U
 
+#define 	REDLIGHT_PORT0		RED_0_GPIO_Port
+#define		AMBERLIGHT_PORT0	AMBER_0_GPIO_Port
+#define		GREENLIGHT_PORT0	AMBER_1_GPIO_Port
+#define		REDLIGHT_PORT1		RED_1_GPIO_Port
+#define		AMBERLIGHT_PORT1	AMBER_1_GPIO_Port
+#define		GREENLIGHT_PORT1	GREEN_1_GPIO_Port
+
+#define		REDLIGHT_PIN0		RED_0_Pin
+#define		AMBERLIGHT_PIN0		AMBER_0_Pin
+#define		GREENLIGHT_PIN0		GREEN_0_Pin
+#define		REDLIGHT_PIN1		RED_1_Pin
+#define		AMBERLIGHT_PIN1		AMBER_1_Pin
+#define		GREENLIGHT_PIN1		GREEN_1_Pin
+
 /* Function prototypes -------------------------------------------------------*/
-void Light_Init();
-void Light_Control(uint8_t bitmask);
+
+typedef enum
+{
+	light_rst = 0,
+	light_set,
+}TrafLig_t;
+
+void set_lights(TrafLig_t red1, TrafLig_t amber1, TrafLig_t green1, TrafLig_t red2, TrafLig_t amber2, TrafLig_t green2);
 
 #endif /* INC_TRAFFIC_LIGHT_H_ */

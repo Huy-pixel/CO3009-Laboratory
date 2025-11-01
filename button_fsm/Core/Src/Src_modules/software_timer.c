@@ -9,7 +9,7 @@
 #include "main.h"
 #include "tim.h"
 #include "stdint.h"
-
+#include "Inc_modules/queue.h"
 /* Header file ---------------------------------------------------------------*/
 #include "Inc_modules/software_timer.h"
 
@@ -30,19 +30,23 @@ typedef struct software_timer
 /* Software-timer components --------------------------------------------------*/
 static timer_t timer_memory_pool[MAX_TIMER];	/* a software-timer pool with 10 timers available */
 static uint8_t g_seedID = 1;					/* seed for generate timer's id , 0 is preserved for flag*/
-static timer_t* p_active_list;					/* pointer to the head of active list */
-static timer_t* p_free_list;					/* pointer to the free list */
+static timer_t* gp_active_list;					/* pointer to the head of active list */
+static timer_t* gp_free_list;					/* pointer to the free list */
 static volatile uint8_t g_flag;					/* global flag of software timer */
-
+#ifdef queue_event
+static volatile queue_t g_qflag;
+#endif
 /* Singly linked list method-like functions forward declaration --------------*/
 static timer_t* timer_fetch_free_slot(void);
 static timer_t* timer_construct(uint32_t delay, uint32_t period);
 static void timer_destruct(timer_t* timer);
 static void timer_add_to_list(timer_t* timer, timer_t* *head);
 static timer_t* timer_delete_head(timer_t* *head);
-static void timer_raise_flag(timer_t* timer);
+static inline void timer_raise_flag(timer_t* timer);
 static void timer_memory_pool_init(void);
-static inline void timer_run(timer_t* timer);
+
+static inline void head_timer_run();
+static inline uint8_t is_head_timer_expired();
 /* Private implementation ----------------------------------------------------*/
 
 /*
@@ -50,10 +54,10 @@ static inline void timer_run(timer_t* timer);
  */
 static timer_t* timer_fetch_free_slot(void)
 {
-	if (!p_free_list) /* No more free slot */
+	if (!gp_free_list) /* No more free slot */
 		return NULL;
-	timer_t* slot = p_free_list;
-	p_free_list = p_free_list->p_next;
+	timer_t* slot = gp_free_list;
+	gp_free_list = gp_free_list->p_next;
 	slot->p_next = NULL;
 	return slot;
 }
@@ -85,8 +89,8 @@ static void timer_destruct(timer_t* timer)
 	{
 		return;
 	}
-	timer->p_next = p_free_list;
-	p_free_list = timer;
+	timer->p_next = gp_free_list;
+	gp_free_list = timer;
 }
 
 /**
@@ -138,9 +142,16 @@ static timer_t* timer_delete_head(timer_t* *head)
 /*
  * Set the global flag by id of the timer expires
  */
-static void timer_raise_flag(timer_t* timer)
+static inline void timer_raise_flag(timer_t* timer)
 {
+#ifdef queue_event
+	if(!queue_enqueue(&g_qflag, timer->id))
+	{
+		//print Buffer Over Flow
+	}
+#else
 	g_flag = timer->id;
+#endif
 }
 
 /*
@@ -153,7 +164,12 @@ static void timer_memory_pool_init(void)
 		timer_memory_pool[i].p_next = &timer_memory_pool[i + 1];
 	}
 	timer_memory_pool[MAX_TIMER - 1].p_next = NULL;
-	p_free_list = &timer_memory_pool[0];
+	gp_free_list = &timer_memory_pool[0];
+}
+
+static inline uint8_t is_head_timer_expired()
+{
+	return gp_active_list->countdown == 0;
 }
 
 /**
@@ -161,21 +177,20 @@ static void timer_memory_pool_init(void)
  * @param	None
  * @retval	None
  */
-static inline void timer_run(timer_t* timer)
+static inline void head_timer_run()
 {
-	if (!timer)			/* No timer is used */
+	if (!gp_active_list)			/* No timer is used */
 	{
 		return;
 	}
 
-	if (timer->countdown > 0)
+	if (gp_active_list->countdown > 0)
 	{
-		timer->countdown--;
-		if (timer->countdown == 0)
+		gp_active_list->countdown--;
+		if (is_head_timer_expired())
 		{
-			timer_raise_flag(timer);
+			timer_raise_flag(gp_active_list);
 		}
-
 	}
 }
 /* Software-timer API --------------------------------------------------------*/
@@ -189,6 +204,9 @@ void software_timer_init(void)
 {
 	HAL_TIM_Base_Start_IT(&htim2);
 	timer_memory_pool_init();
+#ifdef queue_event
+	queue_init(&g_qflag);
+#endif
 }
 
 /**
@@ -199,16 +217,11 @@ void software_timer_init(void)
  * 			e.g: a ONESHOT timer has period value equals zero, whereas PERIODIC does not.
  * @retval	the timer's id
  */
-uint8_t setTimer(uint32_t delay, uint32_t period)
+const uint8_t setTimer(uint32_t delay, uint32_t period)
 {
 	if (!delay && !period)				/* user define a null timer */
 	{
 		return 0;
-	}
-
-	if (!delay)
-	{
-		delay += TIMER_CYCLE; 			/* 0 in users perspective means no delay, but for timer_run() logic, no delay must be value as 1 */
 	}
 
 	timer_t* instance = timer_construct(delay/TIMER_CYCLE, period/TIMER_CYCLE);
@@ -217,7 +230,13 @@ uint8_t setTimer(uint32_t delay, uint32_t period)
 		return 0;
 	}
 
-	timer_add_to_list(instance, &p_active_list);
+	timer_add_to_list(instance, &gp_active_list);
+
+	if(is_head_timer_expired())
+	{
+		timer_raise_flag(gp_active_list);
+	}
+
 	return instance->id;
 }
 
@@ -231,14 +250,22 @@ uint8_t setTimer(uint32_t delay, uint32_t period)
  */
 void clear_flag(void)
 {
+#ifdef queue_event
+	uint8_t expired_flag;
+	if(!queue_dequeue(&g_qflag, &expired_flag))
+	{
+		//
+	}
+#else
 	g_flag = 0;
+#endif
 
-	timer_t* expire = timer_delete_head(&p_active_list);
+	timer_t* expire = timer_delete_head(&gp_active_list);
 
 	if (expire->period)
 	{
 		expire->countdown = expire->period;			/* reload PERIODIC timer's countdown */
-		timer_add_to_list(expire, &p_active_list);		/* move to its place */
+		timer_add_to_list(expire, &gp_active_list);		/* move to its place */
 	}
 	else
 	{
@@ -246,8 +273,8 @@ void clear_flag(void)
 	}
 
 	/* Re-check the following whether it expires */
-	if (p_active_list->countdown == 0)
-		timer_raise_flag(p_active_list);
+	if (is_head_timer_expired())
+		timer_raise_flag(gp_active_list);
 }
 
 /**
@@ -257,6 +284,16 @@ void clear_flag(void)
  */
 uint8_t get_flag(void)
 {
+#ifdef queue_event
+	uint8_t flag;
+
+	if (!queue_peek(&g_qflag, &flag))
+	{
+		return 0;
+	}
+
+	return flag;
+#endif
 	return g_flag;
 }
 
@@ -268,6 +305,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef* htim)
 {
 	if (htim->Instance == TIM2)
 	{
-		timer_run(p_active_list);
+		head_timer_run();
+		//button_scan();
 	}
 }

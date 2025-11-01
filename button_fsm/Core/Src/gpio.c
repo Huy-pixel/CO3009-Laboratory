@@ -32,7 +32,12 @@
 
 /* USER CODE END 1 */
 
-/** Configure pins
+/** Configure pins as
+        * Analog
+        * Input
+        * Output
+        * EVENT_OUT
+        * EXTI
 */
 void MX_GPIO_Init(void)
 {
@@ -45,16 +50,19 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin
-                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin, GPIO_PIN_RESET);
+                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin
+                          |STATUS_LED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, RED_x_Pin|GREEN_x_Pin|YELLOW_x_Pin|RED_y_Pin
-                          |GREEN_y_Pin|YELLOW_y_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, RED_0_Pin|AMBER_0_Pin|GREEN_0_Pin|RED_1_Pin
+                          |AMBER_1_Pin|GREEN_1_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : SEG0_Pin SEG1_Pin SEG2_Pin SEG3_Pin
-                           SEG4_Pin SEG5_Pin SEG6_Pin SEG7_Pin */
+                           SEG4_Pin SEG5_Pin SEG6_Pin SEG7_Pin
+                           STATUS_LED_Pin */
   GPIO_InitStruct.Pin = SEG0_Pin|SEG1_Pin|SEG2_Pin|SEG3_Pin
-                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin;
+                          |SEG4_Pin|SEG5_Pin|SEG6_Pin|SEG7_Pin
+                          |STATUS_LED_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -66,10 +74,10 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : RED_x_Pin GREEN_x_Pin YELLOW_x_Pin RED_y_Pin
-                           GREEN_y_Pin YELLOW_y_Pin */
-  GPIO_InitStruct.Pin = RED_x_Pin|GREEN_x_Pin|YELLOW_x_Pin|RED_y_Pin
-                          |GREEN_y_Pin|YELLOW_y_Pin;
+  /*Configure GPIO pins : RED_0_Pin AMBER_0_Pin GREEN_0_Pin RED_1_Pin
+                           AMBER_1_Pin GREEN_1_Pin */
+  GPIO_InitStruct.Pin = RED_0_Pin|AMBER_0_Pin|GREEN_0_Pin|RED_1_Pin
+                          |AMBER_1_Pin|GREEN_1_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
