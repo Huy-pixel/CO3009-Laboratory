@@ -24,6 +24,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "Inc_modules/software_timer.h"
+#include "Inc_modules/fsm_trafficlight.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -89,19 +90,26 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  software_timer_init();
+  uint8_t init_status = fsm_trafficlight_init();
+
+  if (!init_status)
+  {
+
+  }
+
+  setTimer(1000, 4);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
-  uint8_t intr = setTimer(10, 1000);
   while (1)
   {
-	  uint8_t flag = get_flag();
-	  if (flag == intr)
+	  if (get_flag(4))
 	  {
+		  setTimer(1000, 4);
 		  HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
 	  }
+	  fsm_trafficlight();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

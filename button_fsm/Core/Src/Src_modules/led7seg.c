@@ -6,9 +6,9 @@
  *      Author: soaic
  */
 /* Private includes ----------------------------------------------------------*/
-#include "stdint.h"
-#include "main.h"
 
+/* Header file ---------------------------------------------------------------*/
+#include "Inc_modules/software_timer.h"
 #include "Inc_modules/led7seg.h"
 
 /* Private variables ----------------------------------------------------------*/
@@ -28,7 +28,7 @@ static const uint8_t seg_code[11] =
 		0x07, // 7
 		0x7F, // 8
 		0x6F, // 9
-		0x79  // E: error, exceeding 9
+		0x00  // error, exceeding 9
 };
 
 static GPIO_TypeDef* port[7] =
@@ -53,17 +53,32 @@ static uint16_t pin[7] =
 		SEG6_PIN
 };
 
+static GPIO_TypeDef* en_port[4] =
+{
+		EN0_PORT,
+		EN1_PORT,
+		EN2_PORT,
+		EN3_PORT
+};
+
+static uint16_t en_pin[4] =
+{
+		EN0_PIN,
+		EN1_PIN,
+		EN2_PIN,
+		EN3_PIN
+};
 /* Private code --------------------------------------------------------------*/
 
 /**
- * @brief	Initialize pins that controls 7-segment LED
+ * @brief	Initialize timer for LED scan
  * @param	None
  * @retval	None
  */
 void Led7seg_Init(void)
 {
-	for (uint8_t i = 0; i < 7; i++)
-		HAL_GPIO_WritePin(port[i], pin[i], LED7SEG_RESET);
+	setTimer(SINGLE_LED_CYCLE, 0);
+	setTimer(SINGLE_LED_CYCLE*2, 1);
 }
 
 /**
@@ -85,35 +100,57 @@ void display_single_7SEG(uint8_t num)
  * @param	A number to display, references to ENABLE pin, 2 ENABLE pin requires
  * @retval 	None
  */
-void display_pair_7SEG(uint8_t num, GPIO_TypeDef* en0_port, uint16_t en0_pin, GPIO_TypeDef* en1_port, uint16_t en1_pin)
+inline void display_pair_7SEG(uint8_t num, GPIO_TypeDef* en1_port, uint16_t en1_pin, GPIO_TypeDef* en2_port, uint16_t en2_pin)
 {
-	static uint8_t intr = 0;
 	static uint8_t state = 0;
 
-	if (!intr)
+	if (get_flag(0))
 	{
-		intr = setTimer(0, 10);
-	}
-
-	uint8_t flag = get_flag();
-	if (flag == intr)
-	{
-		clear_flag();
+		setTimer(SINGLE_LED_CYCLE, 0);
 		state = !state;
 		switch(state)
 		{
 		case 0:
-			HAL_GPIO_WritePin(en0_port, en0_pin, EN_SET);
-			HAL_GPIO_WritePin(en1_port, en1_pin, EN_RST);
+			HAL_GPIO_WritePin(en1_port, en1_pin, EN_SET);
+			HAL_GPIO_WritePin(en2_port, en2_pin, EN_RST);
 			display_single_7SEG(num/10);
 		break;
 		case 1:
-			HAL_GPIO_WritePin(en0_port, en0_pin, EN_RST);
-			HAL_GPIO_WritePin(en1_port, en1_pin, EN_SET);
+			HAL_GPIO_WritePin(en1_port, en1_pin, EN_RST);
+			HAL_GPIO_WritePin(en2_port, en2_pin, EN_SET);
 			display_single_7SEG(num%10);
 		break;
 		}
 	}
 }
 
-void display_2pairs_7SEG();
+void display_2pairs_7SEG(uint8_t num1, uint8_t num2)
+{
+	static uint8_t state = 0;
+
+	if (get_flag(1))
+	{
+		setTimer(SINGLE_LED_CYCLE*2, 1);
+		state = !state;
+		if (state)
+		{
+			HAL_GPIO_WritePin(en_port[0], en_pin[0], EN_RST);
+			HAL_GPIO_WritePin(en_port[1], en_pin[1], EN_RST);
+		}
+		else
+		{
+			HAL_GPIO_WritePin(en_port[2], en_pin[2], EN_RST);
+			HAL_GPIO_WritePin(en_port[3], en_pin[3], EN_RST);
+		}
+	}
+
+	switch (state)
+	{
+	case 0:
+		display_pair_7SEG(num1, en_port[0], en_pin[0], en_port[1], en_pin[1]);
+	break;
+	case 1:
+		display_pair_7SEG(num2, en_port[2], en_pin[2], en_port[3], en_pin[3]);
+	break;
+	}
+}

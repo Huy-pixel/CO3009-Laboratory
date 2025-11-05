@@ -9,8 +9,9 @@
 #ifndef INC_LED7SEG_H_
 #define INC_LED7SEG_H_
 
-#include "software_timer.h"
+#include "main.h"
 
+#define LED7SEG_COMMON_ANODE_WITH_LOGIC_INVERTER
 /**
  * Configuration for LED 7 segment set, reset logic level
  * The default configuration is compatible for common usage of LED 7 segment
@@ -28,6 +29,8 @@
 #define EN_SET				0U
 #define EN_RST				1U
 
+#define SINGLE_LED_CYCLE	10
+
 #define SEG0_PORT SEG0_GPIO_Port
 #define SEG1_PORT SEG1_GPIO_Port
 #define SEG2_PORT SEG2_GPIO_Port
@@ -44,9 +47,18 @@
 #define SEG5_PIN SEG5_Pin
 #define SEG6_PIN SEG6_Pin
 
+#define EN0_PORT EN0_GPIO_Port
+#define EN1_PORT EN1_GPIO_Port
+#define EN2_PORT EN2_GPIO_Port
+#define EN3_PORT EN3_GPIO_Port
 
+#define EN0_PIN EN0_Pin
+#define EN1_PIN EN1_Pin
+#define EN2_PIN EN2_Pin
+#define EN3_PIN EN3_Pin
 /* Function prototypes -------------------------------------------------------*/
 void Led7seg_Init(void);
-void display7SEG(uint8_t num);
-void display_pair_7SEG(uint8_t num, GPIO_TypeDef* en0_port, uint16_t en0_pin, GPIO_TypeDef* en1_port, uint16_t en1_pin);
+void display_single_7SEG(uint8_t num);
+void display_pair_7SEG(uint8_t num, GPIO_TypeDef* en1_port, uint16_t en1_pin, GPIO_TypeDef* en2_port, uint16_t en2_pin);
+void display_2pairs_7SEG(uint8_t num1, uint8_t num2);
 #endif /* INC_LED7SEG_H_ */

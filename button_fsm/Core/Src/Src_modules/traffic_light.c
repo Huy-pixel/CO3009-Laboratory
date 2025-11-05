@@ -6,6 +6,7 @@
  */
 
 /* Private includes ----------------------------------------------------------*/
+#include "Inc_modules/software_timer.h"
 #include "Inc_modules/traffic_light.h"
 
 #ifdef TRAFFIC_LIGHT_HARDWARE_MODULE
@@ -39,7 +40,6 @@ uint16_t light_pin[NUM_PIN] =
 		GREENLIGHT_PIN1
 };
 /* Private code --------------------------------------------------------------*/
-
 static inline void set_pin(uint8_t mask)
 {
 	for (uint8_t i = 0; i < NUM_PIN; i++)
@@ -58,8 +58,24 @@ static inline uint8_t set_mask(uint8_t b5, uint8_t b4, uint8_t b3, uint8_t b2, u
 	       ((!!b5) << 0);
 }
 
+/* User API ------------------------------------------------------------------*/
+void traffic_light_init(void)
+{
+	setTimer(10, 2);
+}
+
 void set_lights(TrafLig_t red1, TrafLig_t amber1, TrafLig_t green1, TrafLig_t red2, TrafLig_t amber2, TrafLig_t green2)
 {
 	set_pin(set_mask(red1, amber1, green1, red2, amber2, green2));
 }
 
+uint8_t get_lights(void)
+{
+	uint8_t mask = 0;
+	for (uint8_t i = 0; i < NUM_PIN; i++)
+    {
+        uint8_t bit = HAL_GPIO_ReadPin(light_port[i], light_pin[i]) ? LIGHT_SET : LIGHT_RESET;
+        mask |= (bit << i);
+    }
+    return mask;
+}

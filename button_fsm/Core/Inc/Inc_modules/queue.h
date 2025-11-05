@@ -8,10 +8,9 @@
 #ifndef INC_INC_MODULES_QUEUE_H_
 #define INC_INC_MODULES_QUEUE_H_
 
-#include <stdint.h>
-#include "software_timer.h"
+#include "stdint.h"
 
-#define QUEUE_SIZE	MAX_TIMER
+#define QUEUE_SIZE	10
 #define QUEUE_NEXT(x)  (((x) + 1) % QUEUE_SIZE)
 
 typedef struct {
@@ -40,25 +39,25 @@ static inline uint8_t queue_is_empty(const volatile queue_t *q)
 
 static inline uint8_t queue_enqueue(volatile queue_t *q, uint8_t data)
 {
-    uint8_t next = QUEUE_NEXT(q->head);
-    if (next == q->tail)
+    uint8_t next = QUEUE_NEXT(q->tail);
+    if (next == q->head)
     {
     	return 0;
     }
-    q->buf[q->head] = data;
-    q->head = next;
+    q->buf[q->tail] = data;
+    q->tail = next;
     return 1;
 };
 
 static inline uint8_t queue_dequeue(volatile queue_t *q, uint8_t *data)
 {
-    if (q->head == q->tail)
+    if (q->tail == q->head)
     {
     	return 0;
     }
 
-    *data = q->buf[q->tail];
-    q->tail = QUEUE_NEXT(q->tail);
+    *data = q->buf[q->head];
+    q->head = QUEUE_NEXT(q->head);
 
     return 1;
 };
@@ -70,7 +69,7 @@ static inline uint8_t queue_peek(const volatile queue_t *q, uint8_t *data)
     	return 0;
     }
 
-    *data = q->buf[q->tail];
+    *data = q->buf[q->head];
     return 1;
 };
 #endif /* INC_INC_MODULES_QUEUE_H_ */

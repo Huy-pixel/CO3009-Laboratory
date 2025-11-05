@@ -5,6 +5,7 @@
  *      Author: soaic
  */
 
+#include "Inc_modules/software_timer.h"
 #include "Inc_modules/button.h"
 
 #define LONG_PRESS_COUNT			(LONG_PRESS_TIMEOUT/TIMER_CYCLE)
@@ -38,14 +39,16 @@ GPIO_TypeDef* button_port[NUM_BUTTON] =
 {
 		BUTTON_PORT0,
 		BUTTON_PORT1,
-		BUTTON_PORT2
+		BUTTON_PORT2,
+		BUTTON_PORT3
 };
 
 uint16_t button_pin[NUM_BUTTON] =
 {
 		BUTTON_PIN0,
 		BUTTON_PIN1,
-		BUTTON_PIN2
+		BUTTON_PIN2,
+		BUTTON_PIN3
 };
 
 void button_scan(void)
@@ -65,7 +68,6 @@ void button_scan(void)
 					btn->state = press;
 					btn->press_counter = 0;
 					btn->repeat_counter = 0;
-					g_button_press_event_mask |= (1 << i);
 				break;
 				case press:
 					if (btn->press_counter < 0xFFFFU) btn->press_counter++;
@@ -75,7 +77,6 @@ void button_scan(void)
 						btn->press_counter = LONG_PRESS_COUNT;
 						btn->repeat_counter = 0;
 						g_button_hold_event_mask |= (1 << i);
-						g_button_press_event_mask &= ~(1 << i);
 					}
 				break;
 				case hold:
@@ -95,7 +96,7 @@ void button_scan(void)
 				btn->state = release;
 				btn->press_counter = 0;
 				btn->repeat_counter = 0;
-				g_button_hold_event_mask &= ~(1 << i);
+				g_button_press_event_mask |= (1 << i);
 			}
 		}
 		else
