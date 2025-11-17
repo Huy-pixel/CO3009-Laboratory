@@ -15,10 +15,9 @@
 typedef struct {
     uint8_t data[SEED_STACK_MAX];
     int8_t top;
-}Stack;
+}stack;
 
-void stack_init(Stack *s);
-uint8_t stack_push(Stack *s, uint8_t data);
-uint8_t stack_pop(Stack *s, uint8_t* data);
+uint8_t stack_push(stack *s, uint8_t data);
+uint8_t stack_pop(stack *s, uint8_t* data);
 
 #endif /* INC_INC_MODULES_STACK_H_ */

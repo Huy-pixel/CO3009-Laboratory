@@ -23,7 +23,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "inc_modules/software_timer.h"
+#include "inc_modules/scheduler.h"
+#include "inc_modules/task.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -50,7 +51,10 @@
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
-
+void blinkSTT0();
+void blinkSTT1();
+void blinkSTT2();
+void blinkSTT3();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -89,19 +93,18 @@ int main(void)
   MX_GPIO_Init();
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
-  software_timer_init();
-  uint8_t intr = setTimer(0, 1000);
+  SCH_Init();
+  SCH_Add_Task(task_display_7SEG, 0, 10);
+  SCH_Add_Task(task_main_fsm, 0, 10);
+  SCH_Add_Task(task_status_led, 0, 1000);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  get_flag();
-	  if (is_timer_expired(intr))
-	  {
-		  HAL_GPIO_TogglePin(STATUS_LED_GPIO_Port, STATUS_LED_Pin);
-	  }
+	  SCH_Dispatch();
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -146,7 +149,22 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void blinkSTT0()
+{
+	HAL_GPIO_TogglePin(STT0_GPIO_Port, STT0_Pin);
+}
+void blinkSTT1()
+{
+	HAL_GPIO_TogglePin(STT1_GPIO_Port, STT1_Pin);
+}
+void blinkSTT2()
+{
+	HAL_GPIO_TogglePin(STT2_GPIO_Port, STT2_Pin);
+}
+void blinkSTT3()
+{
+	HAL_GPIO_TogglePin(STT3_GPIO_Port, STT3_Pin);
+}
 /* USER CODE END 4 */
 
 /**
