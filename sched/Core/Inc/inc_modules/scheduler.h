@@ -10,8 +10,8 @@
 
 #include "main.h"
 
-#define SCH_MAX_TASKS		40
-#define CPU_TICK			10
+#define SCH_MAX_TASKS		40U
+#define CPU_TICK			1U
 void SCH_Init(void);
 void SCH_Update(void);
 const uint8_t SCH_Add_Task(void (*pFunc)(), uint32_t delay, uint32_t period);

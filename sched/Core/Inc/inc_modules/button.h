@@ -10,7 +10,7 @@
 
 #include "main.h"
 
-#define TIMER_CYCLE			10
+#define TIMER_CYCLE			1U
 /**
  *	A press that more than 500ms is a long press
  */

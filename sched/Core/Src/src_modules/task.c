@@ -25,9 +25,8 @@ void task_display_7SEG()
 
 void task_normode()
 {
-	if (is_button_pressed(0))
+	if (button_press_consume(0))
 	{
-		clear_button_press_flag(0);
 		normal_mode(1);
 	}
 	else
@@ -38,29 +37,33 @@ void task_normode()
 
 void task_manmode()
 {
-	if (is_button_pressed(0))
+	if (button_press_consume(0))
 	{
-		clear_button_press_flag(0);
 		manual_mode(1);
 	}
 
-	if (is_button_pressed(1))
+	if (button_press_consume(1))
 	{
-		clear_button_press_flag(1);
 		manual_mode(0);
 	}
 }
 
 void task_cfgmode()
 {
-	configure_mode(0);
+	if (button_press_consume(0))
+	{
+		configure_mode(1);
+	}
+	else
+	{
+		configure_mode(0);
+	}
 }
 
 void task_amberblinkmode()
 {
-	if (is_button_pressed(0))
+	if (button_press_consume(0))
 	{
-		clear_button_press_flag(0);
 		amber_blinking_mode(1);
 	}
 	else
@@ -73,11 +76,15 @@ void task_main_fsm()
 {
 	static mode_t mode = init;
 	static uint8_t task;
+
+	static uint8_t index = 0;
+	Led7SEG_display(index);
+
 	switch(mode)
 	{
 	case init:
 		mode = normode;
-		task = SCH_Add_Task(task_normode, 0, 1000);
+		task = SCH_Add_Task(task_normode, 2, 1000);
 	break;
 	case normode:
 		if (is_button_pressed(0))
@@ -85,7 +92,7 @@ void task_main_fsm()
 			mode = manmode;
 			if (!SCH_Delete_Task(task))
 			{}
-			task = SCH_Add_Task(task_manmode, 0, 10);
+			task = SCH_Add_Task(task_manmode, 3, 10);
 		}
 		break;
 	break;
@@ -95,7 +102,7 @@ void task_main_fsm()
 			mode = cfgmode;
 			if (!SCH_Delete_Task(task))
 			{}
-			task = SCH_Add_Task(task_cfgmode, 0, 10);
+			task = SCH_Add_Task(task_cfgmode, 4, 10);
 		}
 		break;
 	break;
@@ -105,7 +112,7 @@ void task_main_fsm()
 			mode = amberblinkmode;
 			if (!SCH_Delete_Task(task))
 			{}
-			task = SCH_Add_Task(task_amberblinkmode, 0, 250);
+			task = SCH_Add_Task(task_amberblinkmode, 3, 250);
 			break;
 		}
 	break;
@@ -115,12 +122,13 @@ void task_main_fsm()
 			mode = normode;
 			if (!SCH_Delete_Task(task))
 			{}
-			task = SCH_Add_Task(task_normode, 0, 1000);
+			task = SCH_Add_Task(task_normode, 2, 1000);
 			break;
 		}
 	break;
 	default:
 	break;
 	}
+	index = (index + 1) & 3;
 }
 

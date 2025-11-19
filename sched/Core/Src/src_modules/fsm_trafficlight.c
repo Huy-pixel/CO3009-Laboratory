@@ -247,6 +247,23 @@ void configure_mode(uint8_t is_transition)
 	static uint8_t RED_time = RED_TIME;
 	static uint8_t GREEN_time = GREEN_TIME;
 
+	if (is_transition)
+	{
+		switch(mode)
+		{
+		case cfg_red:
+			update_7SEG_buffer(RED_time, RED_time);
+		break;
+		case cfg_green:
+			update_7SEG_buffer(GREEN_time, GREEN_time);
+		break;
+		default:
+			mode = cfg_red;
+			update_7SEG_buffer(RED_time, RED_time);
+		break;
+		}
+	}
+
 	if (button_hold_consume(3))
 	{
 		if (RED_time > GREEN_time)

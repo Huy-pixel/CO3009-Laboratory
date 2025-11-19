@@ -94,8 +94,8 @@ int main(void)
   MX_TIM2_Init();
   /* USER CODE BEGIN 2 */
   SCH_Init();
-  SCH_Add_Task(task_display_7SEG, 0, 10);
-  SCH_Add_Task(task_main_fsm, 0, 10);
+  //SCH_Add_Task(task_display_7SEG, 0, 10);
+  SCH_Add_Task(task_main_fsm, 1, 10);
   SCH_Add_Task(task_status_led, 0, 1000);
 
   /* USER CODE END 2 */

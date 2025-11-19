@@ -24,9 +24,25 @@ typedef struct task_type
 	struct task_type* p_next;		/* pointer to the next timer */
 }task_t;
 
+typedef enum
+{
+	SCH_ERROR_NOFREESLOT,
+	SCH_ERROR_IDCOLLECTORFULL
+}SCH_Error;
+
+static SCH_Error error_code;
 static task_t* gp_freelist;
 static task_t* gp_active_list;					/* pointer to the head of active list */
 static stack seedID_collector = {.top = -1};	/* Construct a stack for collecting expire id */
+/* Singly linked list method-like functions forward declaration --------------*/
+static task_t* task_memory_pool_init(task_t* task_arr);
+static task_t* task_fetch_free_slot(void);
+static task_t* task_allocate(void (*pFunc)(), uint32_t delay, uint32_t period);
+static void task_deallocate(task_t* task);
+static void task_add(task_t* task, task_t* *head);
+static task_t* task_delete(uint8_t taskID, task_t* *head);
+static inline uint8_t is_task_wakeup(task_t* task);
+
 
 static task_t* task_memory_pool_init(task_t* task_arr)
 {
@@ -48,14 +64,11 @@ static task_t* task_fetch_free_slot(void)
 		initialize = 1;
 	}
 
+	if (!gp_freelist) /* No more free slot */
+		return NULL;
 	task_t* slot = gp_freelist;
-
-	if (slot)
-	{
-		gp_freelist = gp_freelist->p_next;
-		slot->p_next = NULL;
-	}
-
+	gp_freelist = gp_freelist->p_next;
+	slot->p_next = NULL;
 	return slot;
 }
 
@@ -97,8 +110,7 @@ static void task_deallocate(task_t* task)
 
 	if (!stack_push(&seedID_collector, task->taskid))
 	{
-		//do something when stack is full
-		//report error, abandon this id
+		error_code = SCH_ERROR_IDCOLLECTORFULL;
 	}
 
 	task->p_next = gp_freelist;
@@ -142,23 +154,35 @@ static task_t* task_delete(uint8_t taskID, task_t* *head)
 	task_t* curr = *head;
 	task_t* prev = NULL;
 
-	if (curr->taskid == taskID) {
+	if (curr->taskid == taskID)
+	{
         *head = curr->p_next;
+
+        if (curr->p_next)
+        {
+            curr->p_next->delay += curr->delay;
+        }
+
         curr->p_next = NULL;
         return curr;
 	}
 
-	while (curr != NULL && curr->taskid != taskID) {
+	while (curr && curr->taskid != taskID)
+	{
         prev = curr;
         curr = curr->p_next;
 	}
 
-	if (curr == NULL)
+	if (!curr)
 	{
 		return NULL;
 	}
 
-	curr->p_next->delay += curr->delay;		/* add its delay for the following, ensure the relations between tasks */
+	if (curr->p_next)
+	{
+		curr->p_next->delay += curr->delay;
+	}
+
 	prev->p_next = curr->p_next;
     curr->p_next = NULL;
 
@@ -173,6 +197,7 @@ static inline uint8_t is_task_wakeup(task_t* task)
 /* API */
 void SCH_Init(void)
 {
+	//task_memory_pool_init();
 	HAL_TIM_Base_Start_IT(&htim2);
 }
 
@@ -233,7 +258,10 @@ void SCH_Dispatch(void)
 		}
 
 		(*worker->pTask)();
-		worker->RunMe -= 1;
+		if (worker->RunMe > 0)
+		{
+			worker->RunMe -= 1;
+		}
 
 		if (worker->period)
 		{
